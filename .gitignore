@@ -1,0 +1,26 @@
+# 工具运行时状态（会话 ID、时间戳等），不应纳入版本控制
+.omo/
+.omx/
+
+# spec-workflow 工具产物：默认模板随工具版本更新，不纳入项目版本控制
+.spec-workflow/templates/
+
+# user-templates/ 下的自定义模板应当跟踪（工具文档明确要求），
+# 但其自带的说明文档是工具产物，故排除
+.spec-workflow/user-templates/README.md
+
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+.next/
+
+# 环境变量
+.env
+.env.local
+
+# 编辑器与系统文件
+.DS_Store
+*.swp
+.idea/
+.vscode/
