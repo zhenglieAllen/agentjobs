@@ -1,216 +1,581 @@
-# AgentJobs 任务分解 - 30 天市场验证
+# AgentJobs 任务分解 - 30 天市场验证（双轨道）
 
-> **时间线对齐**：本文件阶段 1-5 对应第 1-4 周验证期 + 第 5 周决策 Gate，与 `mvp-boundaries.md`「时间边界」、`validation-metrics.md` Week 1-4 一致。**平台开发不在本文件内**，其任务分解在验证通过后另行编写。
+> **时间线对齐**：第 1-4 周为验证期，第 5 周为决策 Gate，与 `mvp-boundaries.md`「时间边界」、`validation-metrics.md` Week 1-4 一致。**平台开发不在本文件内**，其任务分解在验证通过后另行编写。
 
-## ⚠️ 执行轨道说明（必读）
+## 🤖 给 agent 的执行指令（自动化框架读取本节）
 
-任务分两类，**执行方式与工具完全不同**：
+1. **只允许勾选 A 轨任务。** 遇到任何 `H` 开头的任务 ID，不得调用 `log-implementation`，不得修改其复选框状态。
+2. **H 轨任务的完成证据由创始人提供**（录音转写、问卷导出、邮件记录、平台截图）。agent 不得代为标记完成，也不得推断完成状态。
+3. **指标阈值一律引用 `validation-metrics.md` 的指标编号**（M1–M12 / S1–S3 / D1–D2），不得在执行中自行设定或推断阈值。
+4. **A 轨任务还须区分子轨**：`[代码]` 子轨完成后调用 `log-implementation`；`[文档]` 子轨**不要**调用（原因见下）。
 
-| 轨道 | 标记 | 任务性质 | 可否由 coding agent 执行 |
-|---|---|---|---|
-| **人工轨** | 🔴 | 真实世界人类互动：发消息、约访谈、做访谈、发问卷、联系企业 | ❌ **不可** |
-| **agent 轨** | 🟢 | 代码/文档/页面产出：着陆页实现、问卷题项设计、竞品资料收集、文档更新 | ✅ 可 |
+## 双轨道执行模型
 
-**`log-implementation` 工具仅适用于 agent 轨**。该工具要求填写 `apiEndpoints` / `components` / `functions` / `classes` / `integrations` 五个 artifact 字段，对人工轨任务（如"发 10 封邮件约访谈"）全部为空——强行调用只会产出空日志与虚假完成标记。
+### 为什么必须分轨
 
-**人工轨任务的完成标准**：由创始人手动勾选，并附证据链接（录音转写、问卷导出、邮件记录）。**禁止 agent 自动勾选人工轨任务。**
+`log-implementation` 工具要求填写五个 artifact 字段：`apiEndpoints` / `components` / `functions` / `classes` / `integrations`。这五个字段是**代码形状**的。旧版 `tasks.md` 给每个任务套用同一模板、结尾统一写「record implementation details with log-implementation tool, then mark this task as complete」，但其中大量任务是真实世界人类互动（发消息、约访谈、做访谈、联系企业），agent 无法代为执行；即使是可自动化的文档类任务，五个字段也全为空。
 
-**任务详情中未提供 Prompt 块的任务**（阶段 3.3、阶段 4.2-4.4、阶段 5 全部）属人工轨或待补充，需人工执行或补写 Prompt 后再自动化。
+后果是执行时会产出两种坏结果：人工任务被静默标记为完成（虚假进度），或 agent 任务留下空 artifact 日志（无审计价值）。分轨是为消除这两种失败模式。
 
-## 任务清单
+### 两轨对照
 
-### 阶段 1: 产品验证准备（第 1 周）
-- [x] 创建产品定义文档（requirements.md）
-- [x] 创建设计文档（design.md）
-- [x] 制定任务分解文档（本文件）
-- [x] 确定验证指标和方法（validation-metrics.md）
-- [x] 风险台账与缓解策略（risk-analysis.md）
-- [x] MVP 边界定义（mvp-boundaries.md）
-- [ ] **确定技术选型** 🟢 — design.md 技术选型仍为"或"式候选，将阻塞开发期启动
+| | 🔴 H 轨（人工） | 🟢 A 轨（agent） |
+|---|---|---|
+| **任务性质** | 真实世界人类互动与判断 | 资料收集、文档撰写、代码实现 |
+| **执行者** | 创始人（不可委托部分已单独标注） | coding agent |
+| **典型任务** | 约访谈、做访谈、发问卷、实操竞品平台、方向决策 | 着陆页实现、问卷题项设计、指标计算脚本、竞品资料检索 |
+| **完成标记** | 创始人手动勾选 + 附证据 | agent 勾选 |
+| **`log-implementation`** | ❌ **禁止调用** | 见子轨区分 |
 
-### 阶段 2: 市场验证（第 1-2 周）
-- [ ] 识别并联系 10 名 AI Agent 开发者进行访谈 🔴
-- [ ] 识别并联系 5 家招聘 AI Agent 开发者的公司进行访谈 🔴
-- [ ] 创建着陆页收集兴趣表达 🟢（含 3 变体 A/B）
-- [ ] 在相关社区发布调查问卷 🟢（设计题项）
-- [ ] **问卷投放与回收** 🔴 — 依赖陌生人填写，agent 只能产出问卷本体
-- [ ] **企业职位 seeding 谈判** 🔴 — 要求 M8 承诺企业提供具体职位内容
+### A 轨的两个子轨
 
-### 阶段 3: 竞品分析（第 3 周）
-- [ ] 分析现有求职平台对 AI/ML 岗位的支持情况 🔴（需实际使用平台）
-- [ ] 评估技术岗位专用求职平台的适用性 🔴
-- [ ] 调研是否有专门针对 AI Agent 的求职服务 🟢（公开资料检索）
-- [ ] 总结竞品优缺点及差异化机会 🔴（需综合判断 D1）
-- [ ] **输出结构化对比表** 🟢 — D1 统计依赖结构化数据，见 `validation-metrics.md`「数据归属与存储」
+| 子轨 | 特征 | `log-implementation` |
+|---|---|---|
+| `[代码]` | 产出 API、表结构、脚本、页面组件 | ✅ 调用，五个 artifact 字段有真实内容 |
+| `[文档]` | 产出 Markdown 文档、题项设计、检索结果 | ❌ **不调用**，五个字段全为空；产出以普通 git commit 记录即可 |
 
-### 阶段 4: 需求细化（第 4 周）
-- [ ] 基于访谈结果更新产品定义 🔴（需人工综合）
-- [ ] 确定 MVP 最小功能集 🔴
-- [ ] 制定用户故事(User Stories) 🟢
-- [ ] 估算开发时间和资源 🟢
+> 本次重写的修正点：旧版仅区分「人工 / agent」两轨，隐含「所有 agent 任务都该调 `log-implementation`」。实际上 9 个 A 轨任务中只有 3 个产出代码，另有 6 个是文档类。故细分子轨。
 
-### 阶段 5: 决策 Gate（第 5 周）
-- [ ] 汇总全部验证数据，对照判定阶梯逐项打分 🔴
-- [ ] 评估技术和法律可行性 🟢
-- [ ] 分析运营成本和盈利模式 🔴
-- [ ] 制定风险缓解策略 🔴
-- [ ] **做出项目方向决策** 🔴 — 通过 / 未达标 / 失败
+## 任务 ID 约定
 
-> 旧版阶段 5 为"可行性评估"，但真正的 Go/No-Go 判定在 `validation-metrics.md`。现明确阶段 5 即决策 Gate，判定规则不独立定义。
+- `H<周>.<序号>` —— 人工轨，如 `H1.1`
+- `A<周>.<序号>` —— agent 轨，如 `A1.1`
+- 数字为计划执行周次，**非完成顺序**。存在跨周任务与阻塞关系，见「跨轨依赖」。
 
-## 任务详情
+## 任务总览
 
-### 任务 2.1: 识别并联系 10 名 AI Agent 开发者进行访谈 🔴 人工轨
+### H 轨（人工）
 
-**执行方式**：创始人手动执行。agent 不可代为发消息或约访谈。
+| ID | 周 | 任务 | 关键指标 | 阻塞于 |
+|---|---|---|---|---|
+| H1.1 | 1-2 | 招募并完成 10 场开发者深度访谈 | S1, M4, M5 | A1.2（需先定 schema） |
+| H1.2 | 1-2 | 着陆页推广引流 | M1, M2 | A1.1 |
+| H1.3 | 1-3 | 问卷投放与回收 | S3, M3 | A1.3, A1.2 |
+| H2.1 | 2 | 完成 5 家企业深度访谈 | S2, M6-M9 | A1.2 |
+| H2.2 | 2 | 企业职位 seeding 内容谈判 | 验收标准第 8 项 | H2.1 |
+| H3.1 | 3 | 实操通用求职平台并记录 | M10, M11 | A1.2 |
+| H3.2 | 3 | 实操技术求职平台并记录 | M10, M11 | A1.2 |
+| H4.1 | 4 | 基于访谈与问卷更新产品定义 | — | H1.1, H1.3, H3.1, H3.2 |
+| H4.2 | 4 | 裁剪 MVP 最小功能集 | — | H4.1 |
+| H5.1 | 5 | 汇总数据并对照判定阶梯打分 | 全部 | A1.2 + 全部 H 轨数据任务 |
+| H5.2 | 5 | 运营成本与盈利模式分析 | — | H5.1 |
+| H5.3 | 5 | 风险缓解策略制定 | — | H5.1 |
+| H5.4 | 5 | **项目方向决策** | — | H5.1, H5.2, H5.3 |
 
-**交付物**：
-- 10 份访谈转写文本
-- 10 行结构化摘要（字段：技能标签 / 求职状态 / 痛点 / 需求 / 是否强需求）——供 M4、M5 直接聚合，见 `validation-metrics.md`「数据归属与存储」
+### A 轨（agent）
 
-**Success**：S1 ≥ 10（理想 15），M4 ≥ 60%（理想 80%），M5 ≥ 70%
+| ID | 周 | 子轨 | 任务 | 阻塞于 |
+|---|---|---|---|---|
+| A1.1 | 1 | `[代码]` | 着陆页实现（3 变体 A/B + subscribers 表 + API） | — |
+| A1.2 | 1 | `[代码]` | 验证数据管道：结构化 schema + 指标计算脚本 | — |
+| A1.3 | 1 | `[文档]` | 调查问卷题项设计 | — |
+| A1.4 | 1 | `[文档]` | 技术选型定档 | — |
+| A3.1 | 3 | `[文档]` | 竞品公开资料检索 | — |
+| A3.2 | 3 | `[文档]` | 结构化竞品对比表 | H3.1, H3.2, A3.1 |
+| A4.1 | 4 | `[文档]` | 用户故事编写 | H4.2 |
+| A4.2 | 4 | `[文档]` | 开发时间与资源估算 | A4.1 |
+| A4.3 | 4 | `[文档]` | 技术与法律可行性评估 | A1.4 |
 
-**禁止**：调用 `log-implementation`（五个 artifact 字段对本任务全为空）
+## 跨轨依赖
 
----
+A1.2 是全局关键路径起点：**验证数据的结构化 schema 必须在人工采集之前定稿**，否则访谈与问卷数据无法聚合，M4–M12 全部不可计算。这正是旧版「数据只存在于第三方 SaaS、无存储设计」缺口的修补点。
 
-### 任务 2.2: 识别并联系 5 家招聘 AI Agent 开发者的公司进行访谈 🔴 人工轨
+```
+第 1 周
+  A1.2 (schema + 计算脚本) ──┬──> H1.1 开发者访谈 ──┐
+                             ├──> H1.2 推广引流   ──┤
+  A1.1 (着陆页) ─────────────┘                      │
+  A1.3 (问卷题项) ──────────────> H1.3 问卷投放 ────┤
+                                                       │
+第 2 周                                                  │
+                             ├──> H2.1 企业访谈 ──> H2.2 seeding
+                                                       │
+第 3 周                                                  │
+  A3.1 (资料检索) ──┐                                   │
+  H3.1 (通用平台) ──┼──> A3.2 对比表 ──┐                │
+  H3.2 (技术平台) ──┘                   │                │
+                                        ├──> H4.1 ──> H4.2 ──> A4.1 ──> A4.2
+                                        │    ↑           │
+                                        └────┴───────────┘
+                                                       │
+第 5 周                                                  │
+  A1.2 (运行脚本出分数) ─────────────────────────────> H5.1 ──> H5.2/H5.3 ──> H5.4
+```
 
-**执行方式**：创始人手动执行。
-
-**交付物**：
-- 5 份访谈转写文本
-- 5 行结构化摘要（字段：Agent 项目 / 招聘挑战 / 技能要求 / 预算 / 是否承诺发布 / 招聘难度评分）——供 M6–M9 聚合
-
-**Success**：S2 ≥ 5（理想 8），M6 ≥ 40%（理想 70%），M8 ≥ 20%（理想 40%），M9 ≥ 60%
-
-**禁止**：调用 `log-implementation`
-
----
-
-### 任务 2.3: 创建着陆页收集兴趣表达 🟢 agent 轨
-
-_Prompt:
-Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
-
-Role: 产品验证专家，专注于MVP着陆页设计和部署
-Task: 创建一个简单的着陆页，介绍AgentJobs的概念，并收集访问者的邮箱作为兴趣指标
-Restrictions: 不要创建复杂的功能，只专注于价值主张和邮箱收集；避免复杂的开发
-_Leverage: 使用静态站点生成器(如VitePress)、托管服务(Vercel/Netlify)、邮箱服务(Mailchimp/Firebase)
-_Requirements:
-  - 部署可访问的着陆页，包含清晰的价值主张和邮箱收集表单
-  - **必须实现 3 个价值主张变体（A/B/C）的随机分流**，变体定义见 risk-analysis.md 实验 1
-  - **订阅数据写入自建 subscribers 表**（API: POST /api/subscribers），不得仅存第三方 ESP
-  - 订阅表单需记录 source_channel 与 ab_variant 两个字段
-  - 隐私声明需说明 A/B 归因的 cookie 使用
-Success: 着陆页上线；变体归因可验证；首周订阅 ≥ 50（M1 通过值，理想 100）
-After completing this task, record implementation details with log-implementation tool, then mark this task as complete in tasks.md
-_
-
-> **补充说明**：旧版此任务仅要求"部署着陆页 + 收集邮箱"，但 (a) 无 A/B 变体，而 `mvp-boundaries.md` 把 A/B 列为验证期功能；(b) 未指定数据存储，导致 M1 无法按变体归因。现已在 Requirements 中补齐。若采用纯静态页 + 第三方 ESP，则 A/B 实验无法执行——必须先有 `subscribers` 表。
+**A1.4 技术选型**虽列在第 1 周，但仅在验证通过后才阻塞开发；它不影响验证期任何任务，可与验证并行。
 
 ---
 
-### 任务 2.4: 设计并投放调查问卷 🟢 问卷设计 / 🔴 投放
+# 🔴 H 轨任务详情（人工执行）
 
-_Prompt:
-Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
-
-Role: 产品验证专家，专注于大规模用户调研
-Task: 设计一份关于AI Agent开发者求职需求的调查问卷，含可导出结构化结果的字段设计
-Restrictions: 问卷长度控制在5分钟内完成；避免引导性问题，保持客观
-_Leverage: 利用Google Forms、SurveyMonkey等免费工具
-_Requirements:
-  - 设计涵盖技能分布、求职行为、平台偏好、痛点识别的问卷
-  - **必须包含 M4 题项**：以单选呈现"你需要一个专门面向 AI Agent 开发者的求职平台吗"，选项为 非常需要/比较需要/不太需要/完全不需要。M4 = 选"非常需要"的比例
-  - **必须包含 M12 题项**：对 AgentJobs 价值主张的认同度
-  - **必须包含 M3 计量**：问卷开始与提交的埋点或计数，用于计算完成率
-  - 导出字段须含 submitted_at 与来源渠道，供去重与渠道归因
-  - 设置反垃圾机制（见 validation-metrics.md 数据质量保证）
-Success: 问卷上线；题项可聚合出 M3/M4/M12；S3 ≥ 100（理想 200）
-After completing this task, record implementation details with log-implementation tool, then mark this task as complete in tasks.md
-_
-
-> **轨道拆分**：agent 可完成问卷**设计**（本 Prompt）；**投放与回收**为人工轨——依赖社区发帖、熟人转发等真实渠道，且回收量 S3 ≥ 100 不由 agent 控制。
+> 以下 13 项任务**禁止 agent 标记完成**，**禁止调用 `log-implementation`**。每项的完成证据须由创始人附上。
 >
-> **指标缺口修复**：旧版任务与 `risk-analysis.md` 实验 3 假设"70% 受访者评分 7 分以上（10 分制）"，但问卷中无此题项，该假设不可测量。现改用 M4 并明确要求加入题项。
+> 校验规则（自动化框架可读取）：本节所有任务的 Prompt 块中**不得**出现字符串 `log-implementation tool`。若出现，视为轨道标注错误。
+
+## H1.1 招募并完成 10 场开发者深度访谈
+
+**执行者**：创始人
+
+**执行要点**
+- 免费渠道触达：GitHub 开源项目作者、Hugging Face 社区、Reddit r/LocalLLaMA、Twitter/X AI 圈、中文 AI 社群（LangChain / AutoGen 用户群优先）
+- 不花钱购买名单，不强行推销，重点是倾听
+- 半结构化提纲，确保回答可归类到 M4 / M5
+
+**交付物**
+- 10 份访谈转写文本
+- 10 行结构化摘要，**字段须严格匹配 A1.2 定义的 `interviews.csv` schema**
+
+**Success**：S1 ≥ 10（理想 15）；M4 ≥ 60%（理想 80%）；M5 ≥ 70%
+
+**完成证据**：转写文本路径 + `interviews.csv` 对应行
 
 ---
 
-### 任务 2.5: 企业职位 seeding 谈判 🔴 人工轨（新增）
+## H1.2 着陆页推广引流
 
-**背景**：`risk-analysis.md` 风险 4（双边市场冷启动）指出，平台若以空职位集上线则第一印象即失败。M8 的口头承诺不构成供给。
+**执行者**：创始人
 
-**执行方式**：在任务 2.2 的企业访谈中同步谈判，要求承诺企业提供**具体可发布的职位内容**（职位名、描述、必需技能）。
+**执行要点**
+- A1.1 上线后开始投放；推广渠道即 `subscribers.source_channel` 的取值来源，须逐条记录
+- 早期警报：首周订阅 < 20（M1 未达标区间下沿）→ 立即换渠道，48 小时内重测
 
-**交付物**：≥ 1 家企业的具体职位内容草稿
+**Success**：M1 首周 ≥ 50（理想 100），次周累计 ≥ 100（理想 200）；M2 ≥ 3%（理想 8%）
 
-**Success**：`requirements.md` 验证期验收标准第 8 项达成（seeding 就绪）
-
-**禁止**：调用 `log-implementation`
-
----
-
-### 任务 3.1: 分析现有求职平台对 AI/ML 岗位的支持情况 🔴 人工轨
-
-**执行方式**：需真实注册并使用各平台搜索 Agent 相关职位，记录体验与限制。agent 无法代替。
-
-**交付物**：3-5 个平台的结构化对比行（字段：平台 / Agent 职位搜索结果数 / 是否支持技能标签筛选 / 体验问题），供 M10、M11 聚合
-
-**Success**：完成 3-5 个平台分析，明确现有平台在 Agent 技能标签支持上的不足
-
-**禁止**：调用 `log-implementation`
+**完成证据**：各渠道投放记录 + `subscribers.csv` 导出
 
 ---
 
-### 任务 3.2: 评估技术岗位专用求职平台的适用性 🔴 人工轨
+## H1.3 问卷投放与回收
 
-**执行方式**：同 3.1，需实际使用。
+**执行者**：创始人
 
-**交付物**：≥ 5 个技术求职平台的结构化对比行
+**执行要点**
+- A1.3 产出题项后，由创始人投放至社区（GitHub、Reddit、X、Discord 中文 AI 服务器）
+- 投放量不由 agent 控制，这是本任务属人工轨的根本原因
+- 反垃圾：单邮箱限一次、剔除明显敷衍作答
 
-**Success**：完成对比报告，明确 AgentJobs 差异化定位
+**Success**：S3 ≥ 100（理想 200）；M3 ≥ 70%（理想 90%）
 
-**禁止**：调用 `log-implementation`
-
----
-
-### 任务 3.4: 输出结构化竞品对比表 🟢 agent 轨（新增）
-
-**执行方式**：agent 将 3.1/3.2 的人工记录整理为结构化表。
-
-_Requirements:
-  - 每平台一行，字段固定：平台名 / 覆盖岗位类型 / Agent 职位可得性 / 技能标签支持 / 差异化能力 / 证据链接
-  - 从该表可归纳出 D1（差异化功能点候选）
-Success: 结构化表可导出；D1 可据此统计
-_
+**完成证据**：问卷平台导出 CSV + 投放渠道记录
 
 ---
 
-### 任务 4.1: 基于访谈结果更新产品定义 🔴 人工轨
+## H2.1 完成 5 家企业深度访谈
 
-**执行方式**：需人工综合访谈与问卷数据并做产品判断。agent 可起草，但结论须由创始人确认。
+**执行者**：创始人
 
-**交付物**：更新后的 requirements.md（用户定义、功能范围、验收标准）
+**执行要点**
+- 触达渠道：LinkedIn、AngelList、Crunchbase、AI 公司名单、技术博客招聘公告
+- 保持专业简洁，避免冷邮件轰炸
+- 访谈中需采集 M7 招聘难度评分（10 分制）与 M9 预算准备度
+
+**交付物**
+- 5 份转写文本
+- 5 行结构化摘要，字段匹配 A1.2 的 `companies.csv` schema
+
+**Success**：S2 ≥ 5（理想 8）；M6 ≥ 40%（理想 70%）；M8 ≥ 20%（理想 40%）；M9 ≥ 60%（理想 80%）
+
+**完成证据**：转写文本路径 + `companies.csv` 对应行
+
+---
+
+## H2.2 企业职位 seeding 内容谈判
+
+**执行者**：创始人
+
+**背景**：`risk-analysis.md` 风险 4（双边市场冷启动）指出，平台若以空职位集上线则第一印象即失败。M8 的**口头承诺不构成供给**。
+
+**执行要点**
+- 在 H2.1 访谈过程中同步谈判，避免二次打扰
+- 要求企业提供**具体可发布的职位内容**：职位名、描述、必需技能标签、薪资范围、工作类型
+- 争取 2 家（对应 M8 理想值 40%），保底 1 家
+
+**Success**：`requirements.md` 验证期验收标准第 8 项达成（seeding 就绪，≥ 1 家提供具体职位内容）
+
+**完成证据**：职位内容草稿文件
+
+---
+
+## H3.1 实操通用求职平台并记录
+
+**执行者**：创始人
+
+**执行要点**
+- 覆盖 LinkedIn、Indeed、Glassdoor 等 3-5 个平台
+- **必须真实注册并搜索** "AI Agent" 相关职位，记录：搜索结果数量、是否支持技能标签筛选、筛选维度、体验问题
+- agent 无法代替——需要真人账号与实际交互
+
+**Success**：完成 3-5 个平台分析，明确现有平台在 Agent 技能标签支持上的不足；为 M10（满意度 ≤ 5/10）、M11（差异化需求 ≥ 70%）提供数据
+
+**完成证据**：各平台搜索截图 + `competitors.csv` 对应行
+
+---
+
+## H3.2 实操技术求职平台并记录
+
+**执行者**：创始人
+
+**执行要点**
+- 覆盖 Stack Overflow Jobs、AngelList、Welcome to the Jungle 等 ≥ 5 个技术求职平台
+- 记录重点：技能匹配机制、行业专注度、定价模式、用户群体
+
+**Success**：完成 ≥ 5 个平台对比，明确 AgentJobs 差异化定位
+
+**完成证据**：各平台搜索截图 + `competitors.csv` 对应行
+
+---
+
+## H4.1 基于访谈与问卷更新产品定义
+
+**执行者**：创始人（agent 可起草，结论须创始人确认）
+
+**执行要点**
+- 输入：`interviews.csv`、`companies.csv`、问卷导出、`competitors.csv`
+- 坚持 MVP 原则，避免功能膨胀
+- 所有改动须能追溯到具体受访者反馈，不做无依据的推断
+
+**交付物**：更新后的 `requirements.md`（用户定义、功能范围、验收标准）
 
 **Success**：形成经真实用户反馈校准的产品定义
 
-**禁止**：agent 自动勾选完成——需创始人确认后手动勾选
+**完成证据**：更新后的 requirements.md + 变更说明（每条改动标注依据的访谈/问卷来源）
 
 ---
 
-### 未提供 Prompt 的任务（需人工执行或补写 Prompt）
+## H4.2 裁剪 MVP 最小功能集
 
-以下任务在旧版中无 Prompt 块，无法自动化：
+**执行者**：创始人
 
-| 任务 | 轨道 | 说明 |
+**执行要点**
+- 基于 H4.1 的结论，从 `mvp-boundaries.md`「包含在 MVP 中的功能」中裁剪
+- 参考「范围裁剪顺序」：双向评价 → 站内消息 → 高级筛选 → 档案字段
+- 不可裁剪：用户认证、职位发布、技能标签匹配、申请投递
+
+**Success**：产出明确的最小功能集，且四项不可裁剪项均在内
+
+**完成证据**：裁剪决策记录（保留项 + 裁剪项 + 理由）
+
+---
+
+## H5.1 汇总数据并对照判定阶梯打分
+
+**执行者**：创始人
+
+**执行要点**
+- 运行 A1.2 产出的指标计算脚本，产出 M1–M12 / S1–S3 / D1–D2 实测值
+- 对照 `validation-metrics.md`「判定阶梯」逐项比对，得出结论
+- **注意样本量门槛语义**：S1/S2/S3 未达标时须用已完成样本重算 M4–M12，不得直接判失败
+- **注意 D2 特殊性**：D2 是终端证据，D2 ≥ 1 可在其他指标未达标时单独支撑「继续」；D2 = 0 且 M1–M12 中 ≥ 3 项未达标 → 按风险 4 处理
+
+**Success**：产出完整打分表 + 明确结论（通过 / 强力验证 / 未达标 / 失败）
+
+**完成证据**：打分表（含每项实测值、判定结果）+ 脚本输出
+
+---
+
+## H5.2 运营成本与盈利模式分析
+
+**执行者**：创始人
+
+**执行要点**
+- 成本项：基础设施、ESP、创始人时间投入（按小时折算）
+- 收入项：企业招聘服务订阅费（`requirements.md` 的 MRR 目标）
+- 关键判断：单用户经济模型在 30 天窗口内能否验证
+
+**Success**：产出成本收入估算与盈利路径判断
+
+**完成证据**：分析文档
+
+---
+
+## H5.3 风险缓解策略制定
+
+**执行者**：创始人
+
+**执行要点**
+- 依据 H5.1 的打分结果，重新评估 `risk-analysis.md` 四项高风险（风险 1/2/3/4）的等级
+- 对命中失败值的风险制定具体缓解动作
+- 风险 4（冷启动）的缓解策略见该文档的 seeding / 单边突破 / 人工撮合三条路径
+
+**Success**：每项高风险都有对应的下一步动作与责任人
+
+**完成证据**：更新后的 `risk-analysis.md`
+
+---
+
+## H5.4 项目方向决策 🔒
+
+**执行者**：创始人（**不可委托**）
+
+**执行要点**
+- 输入：H5.1 打分表、H5.2 成本分析、H5.3 风险策略
+- 三选一：进入开发期 / 延长观察至多 1 周 / 转向
+- 判定规则不在此处定义，唯一依据为 `validation-metrics.md`「判定阶梯」
+
+**Success**：明确的方向决策与依据
+
+**完成证据**：决策记录
+
+---
+
+# 🟢 A 轨任务详情（agent 执行）
+
+> 本节 9 项任务分属两个子轨：
+>
+> | 子轨 | 任务 | Prompt 中的工具调用 |
+> |---|---|---|
+> | `[代码]` | A1.1, A1.2 | 含 `record implementation details with log-implementation tool` |
+> | `[文档]` | A1.3, A1.4, A3.1, A3.2, A4.1, A4.2, A4.3 | **无该调用**，且正文显式标注「不调用 `log-implementation`」 |
+>
+> 校验规则（自动化框架可读取）：`[文档]` 子轨任务的 Prompt 块中**不得**出现 `log-implementation tool`；`[代码]` 子轨**必须**出现。
+
+## A1.1 着陆页实现 `[代码]`
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 全栈工程师，专注于验证期落地页实现
+Task: 实现 AgentJobs 着陆页，含 3 个价值主张变体的随机分流与订阅采集
+Restrictions: 不要实现超出落地页的功能；不要引入用户系统；保持单页无框架依赖或使用轻量静态方案
+_Requirements:
+  - 3 个变体按 1:1:1 随机分流，变体文案见 risk-analysis.md 实验 1（变体 A 功能向 / B 痛点向 / C 供需向）
+  - 分流实现须服务端或构建期决定，避免 SEO 与缓存导致变体错乱
+  - 样本不足时（单变体 < 100 次访问）支持降级为只跑 A/B 两变体
+  - **必须自建 subscribers 表**（字段见 design.md），并实现 POST /api/subscribers 与 GET /api/subscribers/export
+  - 订阅表单须同时采集 source_channel 与 ab_variant
+  - 隐私声明须说明 A/B 归因的 cookie 使用
+  - 提供 M1 实时计数（按变体分列）
+Success: 着陆页可访问；变体归因可验证（同一访客多次访问命中同一变体）；订阅数据可导出为 CSV
+After completing this task, record implementation details with log-implementation tool, then mark this task as complete in tasks.md
+_
+
+> **为什么必须自建表**：若采用纯静态页 + 第三方 ESP（Mailchimp 等），则无法按变体归因，实验 1 的结论不可用。`validation-metrics.md`「数据归属与存储」已规定 ESP 不得作为唯一副本。`design.md` 的技术选型仍是「或」式候选，此任务不受其阻塞——落地页可用任意栈实现。
+
+---
+
+## A1.2 验证数据管道：schema + 指标计算脚本 `[代码]`
+
+> **本任务为全局关键路径起点。** 其 schema 必须在 H1.1 / H2.1 / H3.1 采集数据**之前**定稿，否则数据无法聚合、M4–M12 全部不可计算。`validation-metrics.md` 规定：所有百分比指标必须能从结构化数据直接聚合得出，不得依赖分析师手工估算。
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 数据工程师，专注于验证数据的结构化与指标计算
+Task: 定义验证数据的结构化 schema，并实现从原始数据计算 M1-M12 / S1-S3 / D1-D2 全部指标的脚本
+_Requirements:
+  定义以下 CSV schema（含字段名与取值枚举，产出为 schema 文档 + 表头 CSV 模板）：
+
+  1. subscribers.csv — email, source_channel, ab_variant, subscribed_at, confirmed_at, unsubscribed_at
+     （由 A1.1 产出）
+  2. interviews.csv — respondent_id, skill_tags, job_search_status, pain_points,
+     needs, strong_need(布尔), interview_date, channel
+     → 供 M4（strong_need 为 true 的比例）、M5（认同 ≥3 个 pain_points 的比例）
+  3. companies.csv — company_id, agent_projects, hiring_challenge, required_skills,
+     has_budget(布尔), committed_to_post(布尔), difficulty_score(1-10), interview_date
+     → 供 M6（有兴趣）、M7（difficulty_score 均值）、M8（committed_to_post 比例）、M9（has_budget 比例）
+  4. survey_responses.csv — respondent_id, submitted_at, source_channel,
+     m4_answer(枚举: very_needed/somewhat_needed/not_needed/not_at_all),
+     m12_answer, survey_started(布尔)
+     → 供 M3（完成率）、M4（very_needed 比例）、M12（价值认同度）
+  5. competitors.csv — platform, job_types_covered, agent_job_availability,
+     skill_tag_support, differentiation, satisfaction_score(1-10), evidence_url
+     → 供 M10（满意度均值）、M11、D1（差异化功能点归纳）
+
+  计算脚本要求：
+  - 输出完整打分表：每项指标的实测值 + 对照 validation-metrics.md 判定阶梯的通过/理想/失败判定
+  - 阈值从 validation-metrics.md 的判定阶梯读取，**不得硬编码**（若文档更新，脚本须同步生效）
+  - 实现样本量门槛语义：S1/S2/S3 未达标时输出提示，要求用已完成样本重算 M4-M12，且不直接判失败
+  - 实现 D2 特殊规则：D2 ≥ 1 可单独支撑「继续」；D2 = 0 且 M1-M12 中 ≥ 3 项未达标时输出风险 4 告警
+  - 缺列或枚举值非法时明确报错，不得静默跳过或按 0 处理
+Success: 五份 schema 文档 + 表头模板产出；脚本可运行并输出完整打分表；注入非法数据时正确报错
+After completing this task, record implementation details with log-implementation tool, then mark this task as complete in tasks.md
+_
+
+---
+
+## A1.3 调查问卷题项设计 `[文档]`
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 产品验证专家，专注于问卷设计
+Task: 设计一份关于 AI Agent 开发者求职需求的调查问卷，产出可直接录入问卷工具的题项清单
+Restrictions: 长度控制在 5 分钟内完成；避免引导性问题；选项顺序随机化以抑制顺序偏差
+_Requirements:
+  - 覆盖维度：技能分布、求职行为、平台偏好、痛点识别、付费意愿
+  - **必须包含 M4 题项**：单选「你需要一个专门面向 AI Agent 开发者的求职平台吗」，选项为 非常需要 / 比较需要 / 不太需要 / 完全不需要。M4 = 选「非常需要」的比例
+  - **必须包含 M12 题项**：对 AgentJobs 核心价值主张的认同度（5 分量表）
+  - **必须支持 M3 计量**：问卷开始与提交两处计数埋点，用于计算完成率
+  - 导出字段须含 submitted_at 与 source_channel，供去重与渠道归因
+  - 输出字段名须与 A1.2 的 survey_responses.csv schema 对齐
+  - 每题标注对应指标编号，便于后续聚合校验
+  - 附反垃圾设计建议（单邮箱限一次、异常作答识别规则）
+Success: 题项清单产出；M3/M4/M12 可从导出结果聚合得出；字段名与 survey_responses.csv 一致
+_
+
+> **不调用 `log-implementation`**（文档子轨，五个 artifact 字段全为空）。产出以普通 git commit 记录。
+>
+> **指标缺口修复**：旧版任务与 `risk-analysis.md` 实验 3 假设「70% 受访者评分 7 分以上（10 分制）」，但问卷中无此题项，该假设不可测量。现改用 M4 并明确要求加入对应题项。
+
+---
+
+## A1.4 技术选型定档 `[文档]`
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 技术负责人，负责任务分解中技术选型的收敛
+Task: 将 design.md「技术选型建议」中的或式候选项收敛为单一确定方案，产出选型决策文档
+_Requirements:
+  - 需定档的候选项：后端（Node.js+Express 或 Python+FastAPI）、前端（React 或 Vue）、样式（Tailwind 或 Bootstrap）、部署（Vercel/Netlify 前端 + Railway/Render 后端 + Supabase/PlanetScale 数据库）
+  - 每个决策须给出：选择结论、选择理由、被否方案与否决理由
+  - 须覆盖验证期与平台期两个阶段的需求差异（验证期只需 landing page + subscribers API + 问卷页）
+  - 须评估是否需要 Redis（design.md 列为可选项，须给出取舍结论）
+  - 须确认与 mvp-boundaries.md 的技术边界一致：不使用 GraphQL、微服务、容器编排、复杂状态管理
+  - 须确认 UI 语言为 zh-CN 单语言，不引入 i18n 框架
+  - 产出为 design.md 的替换内容或独立的 tech 决策文档
+Success: 全部候选项收敛为单一方案；每个决策有理由与否决记录；与 mvp-boundaries.md 技术边界无冲突
+_
+
+> **不调用 `log-implementation`**（文档子轨）。
+>
+> 该任务是 `tasks.md` 阶段 1 遗留的未完成项。虽列在第 1 周，但仅在验证通过后阻塞开发，不影响验证期任何任务，可与验证并行。
+
+---
+
+## A3.1 竞品公开资料检索 `[文档]`
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 竞品分析专家，专注于公开资料研究
+Task: 调研市面上是否存在专门面向 AI Agent 开发者的求职服务，以及通用/技术求职平台对 Agent 岗位的支持情况
+_Requirements:
+  - 检索范围：AI 专用招聘平台、Agent 岗位聚合站、技术招聘平台对 AI/ML 岗位的覆盖情况
+  - 每个发现须记录：平台名、定位、目标用户、是否支持 Agent 岗位、定价模式（如公开）、来源 URL
+  - 明确区分「公开资料可查」与「需实操验证」两类信息；后者移交 H3.1 / H3.2
+  - 输出字段须与 A1.2 的 competitors.csv schema 对齐，可直接并入
+  - 不得臆断：每个结论须附来源 URL，无来源的判断须显式标注为推测
+Success: 输出结构化发现清单 + 来源链接；可直接并入 competitors.csv；需实操验证的部分已明确移交
+_
+
+> **不调用 `log-implementation`**（文档子轨）。
+>
+> 本任务仅覆盖公开资料可查的部分。平台的真实搜索体验无法通过资料检索获得，必须由 H3.1 / H3.2 真人实操完成。
+
+---
+
+## A3.2 结构化竞品对比表 `[文档]`
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 数据整理者，负责将人工记录转为可聚合数据
+Task: 将 H3.1、H3.2、A3.1 的人工记录与检索结果整理为统一的结构化竞品对比表
+_Requirements:
+  - 输入：H3.1 / H3.2 的人工记录（含截图与笔记）、A3.1 的检索结果
+  - 输出字段严格对齐 A1.2 的 competitors.csv schema：platform, job_types_covered, agent_job_availability, skill_tag_support, differentiation, satisfaction_score, evidence_url
+  - 每行必须有 evidence_url 或截图路径支撑，无证据的字段留空而非填写推测值
+  - 汇总 M10（满意度均值，验证 ≤5/10）与 M11（提出 ≥3 项差异化需求的用户比例）
+  - 归纳 D1 差异化功能点候选，须逐条对应到至少一个平台的对比证据
+Success: 对比表可导出为 CSV；字段完整且每行有证据；M10/M11 可聚合；D1 候选有证据支撑
+_
+
+> **不调用 `log-implementation`**（文档子轨）。阻塞于 H3.1、H3.2、A3.1。
+>
+> 字段一致性要求高：若本任务产出的列名与 A1.2 的 schema 不符，M10/M11/D1 将无法聚合。故须严格对齐，不得自行增删列。
+
+---
+
+## A4.1 用户故事编写 `[文档]`
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 产品经理，负责将验证结论转化为可开发的需求描述
+Task: 基于 H4.2 裁剪后的最小功能集，编写用户故事(User Stories)
+_Requirements:
+  - 覆盖 H4.2 保留的全部功能
+  - 每条故事格式：作为<角色>，我希望<行为>，以便<价值>
+  - 须标注所属验收标准（requirements.md 的平台验收标准编号）
+  - 须标注是否落在验证期证据支持范围内——无访谈/问卷依据的假设须显式标为「假设待验」
+  - 区分开发者侧与企业侧故事
+Success: 每条保留功能有对应用户故事；验收标准可追溯；无依据的假设已显式标注
+_
+
+> **不调用 `log-implementation`**（文档子轨）。阻塞于 H4.2。
+
+---
+
+## A4.2 开发时间与资源估算 `[文档]`
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 技术负责人，负责开发期工作量估算
+Task: 基于 A4.1 的用户故事与 A1.4 的技术选型，估算开发期时间与资源
+_Requirements:
+  - 按 mvp-boundaries.md「时间边界」阶段三的 3 周工期进行估算，逐周分配
+  - 逐条用户故事给出人日估算
+  - 识别关键路径与可并行项
+  - 对照「范围裁剪顺序」指出：若工期超期，优先裁剪哪几条
+  - 明确标注估算假设（是否含测试、部署、文档时间）
+  - 须评估 3 周工期对 solo founder 的可行性，若不可行须明确说明并给出建议
+Success: 逐周任务分配表；每条故事有人日估算；关键路径明确；工期可行性有明确结论
+_
+
+> **不调用 `log-implementation`**（文档子轨）。阻塞于 A4.1。
+
+---
+
+## A4.3 技术与法律可行性评估 `[文档]`
+
+_Prompt:
+Implement the task for spec agentjobs, first run spec-workflow-guide to get the workflow guide then implement the task:
+
+Role: 技术与合规评估者，负责平台期可行性判断
+Task: 评估平台在技术与法律层面的可行性
+_Requirements:
+  技术可行性：
+  - 评估 A1.4 选型对 design.md 数据模型（11 张表）的支撑程度
+  - 识别设计文档中未覆盖的技术细节（如并发、事务边界、鉴权粒度）
+  - 评估 mvp-boundaries.md 性能边界（1000 用户 / 每天 100 次职位浏览）是否可达
+  法律与合规可行性：
+  - 识别需关注的合规项：招聘平台责任、简历与个人信息保护、数据跨境传输（requirements.md 限定中国与美国两个市场）
+  - 识别 design.md「隐私政策要点」是否完整覆盖 requirements.md 的用户角色设计
+  - 明确哪些事项须咨询专业法律意见，不可仅凭技术判断
+Success: 技术可行性有明确结论；法律风险项已列出并标注是否需专业意见；未覆盖的设计细节已识别
+_
+
+> **不调用 `log-implementation`**（文档子轨）。阻塞于 A1.4。
+>
+> 本任务不替代专业法律意见，只做风险识别与「是否需要咨询」的判断。
+
+---
+
+## 旧版任务编号映射
+
+本次重写统一了 ID 体系。旧编号对应关系：
+
+| 旧编号 | 新编号 | 变化 |
 |---|---|---|
-| 2.4 问卷投放 | 🔴 | agent 只能产出问卷本体 |
-| 阶段 3.3 调研是否有专门针对 AI Agent 的求职服务 | 🟢 | 可补写 Prompt 做公开资料检索 |
-| 阶段 4.2 确定 MVP 最小功能集 | 🔴 | 需人工裁剪决策 |
-| 阶段 4.3 制定用户故事 | 🟢 | 可补写 Prompt |
-| 阶段 4.4 估算开发时间和资源 | 🟢 | 可补写 Prompt |
-| 阶段 5.1 汇总数据打分 | 🔴 | 需人工判读 |
-| 阶段 5.3 分析运营成本和盈利模式 | 🔴 | 需人工判断 |
-| 阶段 5.4 制定风险缓解策略 | 🔴 | 需人工判断 |
-| 阶段 5.5 做出方向决策 | 🔴 | **创始人专属，不可委托** |
+| 2.1 开发者访谈 | H1.1 | 拆出 H1.1，并明确依赖 A1.2 |
+| 2.2 企业访谈 | H2.1 | 同上 |
+| 2.3 着陆页 | A1.1 | 补充 A/B 分流与 subscribers 表要求 |
+| 2.4 问卷 | A1.3 + H1.3 | **拆为设计与投放两个任务**（旧版一个任务混了两种轨道） |
+| 2.5 seeding 谈判 | H2.2 | ID 规范化 |
+| 3.1 通用平台分析 | H3.1 | — |
+| 3.2 技术平台分析 | H3.2 | — |
+| 3.3 调研 Agent 专用求职服务 | A3.1 | 明确限定为公开资料检索 |
+| 3.4 结构化对比表 | A3.2 | 编号断层已修复（旧版阶段列表写 3.3、任务详情写 3.4） |
+| 4.1 更新产品定义 | H4.1 | — |
+| 4.2 确定 MVP 最小功能集 | H4.2 | — |
+| 4.3 用户故事 | A4.1 | — |
+| 4.4 开发估算 | A4.2 | — |
+| 5.1 汇总打分 | H5.1 | 补充 A1.2 脚本前置 |
+| 5.2 技术法律可行性 | A4.3 | 移至第 4 周（不阻塞第 5 周打分） |
+| 5.3 运营成本分析 | H5.2 | — |
+| 5.4 风险缓解 | H5.3 | — |
+| 5.5 方向决策 | H5.4 | 标注不可委托 |
+| —（新增） | A1.2 | **验证数据管道**，修补「数据无存储设计」缺口 |
+| —（新增） | A1.4 | 技术选型定档，阶段 1 遗留项 |
