@@ -550,6 +550,20 @@ def compute(
     rep.add("S2", len(companies), f"企业访谈记录 {len(companies)} 条", thresholds, "companies.csv")
     rep.add("S3", len(survey), f"问卷记录 {len(survey)} 条", thresholds, "survey_responses.csv")
 
+    # 数据质量：已开始但未提交的记录若带有指标答案，说明问卷工具导出了半填数据。
+    # 这类记录会稀释 M4/M11/M12 的分母，须显式提示而不是默默计入。
+    partial = [
+        r for r in survey
+        if not r["submitted_at"] and (r["m4_answer"] or r["m12_answer"] or r["differentiation_needs"])
+    ]
+    if partial:
+        rep.warnings.append(
+            f"[数据质量] {len(partial)} 条问卷已开始但未提交，却带有指标答案"
+            f"（m4_answer / m12_answer / differentiation_needs）。"
+            f"这些半填记录已计入 M4/M11/M12 的分母，会系统性稀释比例指标。"
+            f"若问卷工具只应在提交后才导出答案，请检查其导出设置"
+        )
+
     sample_short = {
         r.key: r for r in rep.results if r.key in ("S1", "S2", "S3") and r.verdict != PASS
     }

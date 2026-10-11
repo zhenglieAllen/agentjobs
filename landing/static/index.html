@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentJobs — AI Agent 开发者的求职平台</title>
+<meta name="description" content="专门面向 AI Agent 开发者的求职平台。技能标签原生支持 LangChain、AutoGen、ReAct 等 Agent 技术栈。">
+<meta name="robots" content="index, follow">
+<!-- 变体随服务端渲染下发：同一访客多次访问由 aj_var cookie 保证命中同一变体 -->
+<meta name="aj-variant" content="{{VARIANT_ID}}">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="site">
+  <span class="brand">Agent<span class="brand-dot">Jobs</span></span>
+  <a class="privacy-link" href="/privacy">隐私说明</a>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="eyebrow">AI Agent 开发者专属求职平台</p>
+    <h1>{{HEADLINE}}</h1>
+    <p class="subheadline">{{SUBHEADLINE}}</p>
+
+    <ul class="points">
+{{POINTS}}
+    </ul>
+
+    <form id="signup" class="signup" novalidate>
+      <label class="sr-only" for="email">邮箱地址</label>
+      <input
+        id="email" name="email" type="email" required
+        autocomplete="email" placeholder="你的工作邮箱"
+        aria-describedby="form-msg">
+
+      <label class="sr-only" for="source_channel">你从哪里了解到我们</label>
+      <select id="source_channel" name="source_channel" required aria-describedby="form-msg">
+        <option value="">你从哪里了解到我们？</option>
+        <option value="reddit">Reddit</option>
+        <option value="huggingface">Hugging Face</option>
+        <option value="github">GitHub</option>
+        <option value="x">X / Twitter</option>
+        <option value="discord">Discord</option>
+        <option value="wechat">微信 / 中文 AI 社群</option>
+        <option value="friend">朋友推荐</option>
+        <option value="other">其他</option>
+      </select>
+
+      <!-- 蜜罐：真实用户看不到；填了视为机器人，静默丢弃 -->
+      <div class="hp" aria-hidden="true">
+        <label for="company">公司名称</label>
+        <input id="company" name="company" type="text" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button type="submit">{{CTA}}</button>
+    </form>
+
+    <p id="form-msg" class="form-msg" role="status" aria-live="polite"></p>
+    <p class="fineprint">
+      仅用于产品上线通知，每封邮件都可一键退订。
+      订阅行为会记录来源渠道与价值主张变体，用于判断哪种定位更有效，详见<a href="/privacy">隐私说明</a>。
+    </p>
+  </section>
+</main>
+
+<footer class="site">
+  <p>AgentJobs — The job board for people who build AI Agents</p>
+</footer>
+
+<script>window.AJ_VARIANT = "{{VARIANT_ID}}";</script>
+<script src="/app.js"></script>
+</body>
+</html>

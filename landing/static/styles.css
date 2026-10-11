@@ -1,0 +1,147 @@
+:root {
+  --bg: #0b0d12;
+  --surface: #141821;
+  --border: #232936;
+  --text: #e8ecf3;
+  --muted: #8b95a8;
+  --accent: #5eead4;
+  --accent-dim: #2dd4bf;
+  --err: #f87171;
+  --ok: #4ade80;
+  --radius: 10px;
+  --max: 44rem;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.site {
+  width: 100%;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand { font-weight: 700; font-size: 1.125rem; letter-spacing: -0.01em; }
+.brand-dot { color: var(--accent); }
+
+.privacy-link { color: var(--muted); font-size: 0.875rem; text-decoration: none; }
+.privacy-link:hover, .privacy-link:focus-visible { color: var(--accent); }
+
+main { flex: 1; width: 100%; max-width: var(--max); margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.875rem, 5.5vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+.subheadline { margin: 0 0 2rem; color: var(--muted); font-size: 1.0625rem; max-width: 38rem; }
+
+.points { margin: 0 0 2.5rem; padding: 0; list-style: none; display: grid; gap: 0.75rem; }
+.points li {
+  position: relative;
+  padding-left: 1.75rem;
+  color: var(--text);
+  font-size: 0.9375rem;
+}
+.points li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.55em;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.signup {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.signup input[type="email"],
+.signup select {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.9375rem;
+}
+.signup input[type="email"]::placeholder { color: #5a6478; }
+
+.signup input:focus-visible,
+.signup select:focus-visible,
+.signup button:focus-visible,
+.privacy-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.signup button {
+  padding: 0.8125rem 1rem;
+  background: var(--accent);
+  color: #06231f;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.signup button:hover:not(:disabled) { background: var(--accent-dim); }
+.signup button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.form-msg { min-height: 1.5rem; margin: 0.875rem 0 0; font-size: 0.875rem; }
+.form-msg.err { color: var(--err); }
+.form-msg.ok { color: var(--ok); }
+
+.fineprint { margin: 0; color: var(--muted); font-size: 0.8125rem; }
+.fineprint a { color: var(--accent); }
+
+footer.site { border-top: 1px solid var(--border); padding-top: 1.25rem; }
+footer.site p { margin: 0; color: var(--muted); font-size: 0.8125rem; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

@@ -1,0 +1,142 @@
+{
+  "_comment": "机器可读的题项源。survey-instrument.md 是它的人类可读版本，二者必须同步。check_instrument.py 校验本文件与 validation 的 schema / 判定阶梯是否一致。",
+
+  "title": "AgentJobs 开发者求职需求调查",
+  "language": "zh-CN",
+  "estimated_minutes": "3-5",
+
+  "M3_requires_start_event": true,
+  "randomize_all_options": true,
+
+  "intro": "这份问卷由一个正在做 AI Agent 开发者求职平台的团队发起，目的是弄清楚：你们找工作时真正卡在哪里，以及一个垂直平台能不能帮上忙。约 3–5 分钟，全部题目无对错之分。结果只用于产品判断，不会公开，也不会用于招聘筛选。如留下邮箱，仅用于产品上线通知，每封可一键退订。",
+
+  "questions": [
+    {
+      "id": "Q1", "dimension": "技能分布", "type": "single", "metric": null,
+      "text": "你目前的工作角色是？",
+      "options": ["AI/Agent 工程师", "后端/全栈工程师", "算法/ML 工程师", "独立开发者", "产品/技术管理", "学生/研究者", "其他"]
+    },
+    {
+      "id": "Q2", "dimension": "技能分布", "type": "multi", "metric": null,
+      "text": "过去 12 个月你使用过下列哪些 Agent 技术？",
+      "options": ["LangChain", "LlamaIndex", "AutoGen", "CrewAI", "BabyAGI", "Semantic Kernel", "OpenAI Assistants API", "Dify / FastGPT 等低代码平台", "手写多智能体编排", "还没用过"]
+    },
+    {
+      "id": "Q3", "dimension": "技能分布", "type": "multi", "metric": null,
+      "text": "你的主力语言是？",
+      "options": ["Python", "TypeScript / JavaScript", "Go", "Java", "Rust", "其他"]
+    },
+
+    {
+      "id": "Q4", "dimension": "求职行为", "type": "single", "metric": null,
+      "text": "你目前的求职状态是？",
+      "options": ["正在积极投递", "偶尔看看机会", "暂时不换工作，但会关注", "暂不求职"]
+    },
+    {
+      "id": "Q5", "dimension": "求职行为", "type": "single", "metric": null,
+      "text": "过去 6 个月你实际投递过多少个岗位？",
+      "options": ["0 个", "1–3 个", "4–10 个", "11–30 个", "30 个以上"]
+    },
+    {
+      "id": "Q6", "dimension": "求职行为", "type": "multi", "metric": null,
+      "text": "你通常在哪里找 AI/Agent 相关岗位？",
+      "options": ["LinkedIn", "BOSS 直聘 / 拉勾 / 猎聘", "内推", "GitHub / 开源社区", "技术论坛（如 V2EX、知乎）", "AI 垂直社区（Hugging Face、各类 Agent 社群）", "公司官网招聘页", "其他"]
+    },
+
+    {
+      "id": "Q7", "dimension": "痛点识别", "type": "multi", "metric": "M5（旁证）",
+      "text": "以下说法与你的实际情况相符吗？",
+      "_note": "M5 主数据源是 interviews.csv 的 pain_points 列。本题为问卷侧旁证，措辞须与访谈提纲保持一致，否则跨源聚合失效。",
+      "options": [
+        "找不到纯 Agent 岗位，混在通用 AI/ML 岗位里",
+        "招聘方看不懂我的 Agent 项目经验",
+        "每次面试都要从零解释什么是 Agent、多智能体怎么协作",
+        "岗位描述的技术栈与实际工作内容对不上",
+        "薪资水平不透明，只能靠问",
+        "远程 Agent 岗位太少",
+        "缺少能展示 Agent 项目的公开作品集渠道",
+        "上述都不是我的问题"
+      ]
+    },
+
+    {
+      "id": "Q8", "dimension": "平台需求", "type": "single", "metric": "M4",
+      "export_field": "m4_answer",
+      "text": "你需要一个专门面向 AI Agent 开发者的求职平台吗？",
+      "_note": "M4 = 选择「非常需要」的比例。选项措辞被判定阶梯的阈值绑定，不得改动、增删或改变顺序含义。",
+      "options": [
+        { "label": "非常需要", "value": "very_needed", "numerator": true },
+        { "label": "比较需要", "value": "somewhat_needed", "numerator": false },
+        { "label": "不太需要", "value": "not_needed", "numerator": false },
+        { "label": "完全不需要", "value": "not_at_all", "numerator": false }
+      ]
+    },
+
+    {
+      "id": "Q9", "dimension": "差异化需求", "type": "multi", "metric": "M11",
+      "export_field": "differentiation_needs",
+      "unlimited_choices": true,
+      "text": "你希望求职平台提供哪些现有平台没有的功能？",
+      "_note": "M11 = 勾选 ≥3 项的受访者占比。本题是 M11 的唯一数据源。「其他」自由文本不计入 M11，但保留在导出中。",
+      "excluded_from_metric": ["其他"],
+      "options": [
+        "Agent 技能标签筛选（如按 LangChain / AutoGen 过滤）",
+        "Agent 岗位专区（与通用岗位物理隔离）",
+        "技术栈匹配（岗位要求与我的技能栈自动比对）",
+        "薪酬水平透明（同类岗位薪资区间可查）",
+        "远程 Agent 岗位聚合",
+        "可展示 Agent 项目的作品集 / 主页",
+        "只筛 Agent 相关、屏蔽无关内推与猎头消息",
+        "其他"
+      ]
+    },
+
+    {
+      "id": "Q10", "dimension": "价值认同", "type": "single", "metric": "M12",
+      "export_field": "m12_answer",
+      "text": "「AgentJobs 让你不用在招聘时反复解释 Agent 是什么，就能找到理解你技术栈的雇主。」",
+      "_note": "M12 = 选择「同意」或「非常同意」的比例。5 分量表。",
+      "options": [
+        { "label": "非常同意", "value": "strongly_agree", "numerator": true },
+        { "label": "同意", "value": "agree", "numerator": true },
+        { "label": "一般", "value": "neutral", "numerator": false },
+        { "label": "不同意", "value": "disagree", "numerator": false },
+        { "label": "非常不同意", "value": "strongly_disagree", "numerator": false }
+      ]
+    },
+
+    {
+      "id": "Q11", "dimension": "付费意愿", "type": "single", "metric": null,
+      "text": "如果有平台能让你免去反复解释 Agent 是什么，你愿意为它付费吗？",
+      "options": ["愿意付费", "有条件付费（价格合理才考虑）", "不愿意", "不确定"]
+    },
+    {
+      "id": "Q12", "dimension": "付费意愿", "type": "multi", "metric": null,
+      "text": "什么样的付费模式对你合理？",
+      "options": ["按次付费（每次投递收费）", "订阅制（月费）", "仅在拿到 offer 后付费", "完全免费即可", "不适用——我是招聘方"]
+    },
+
+    {
+      "id": "Q13", "dimension": "收尾", "type": "single", "metric": null,
+      "text": "你愿意留下邮箱，产品上线时通知你吗？",
+      "options": ["愿意", "不愿意"]
+    },
+    {
+      "id": "Q14", "dimension": "收尾", "type": "text", "metric": null,
+      "text": "邮箱（选填）",
+      "_note": "不参与任何指标计算，仅用于上线通知。"
+    }
+  ],
+
+  "instrumentation": {
+    "survey_started": "问卷被打开即写入一行并置 true（M3 分母）",
+    "submitted_at": "交卷时回填；留空表示只开始未提交（M3 分子）",
+    "source_channel": "由投放方（任务 3）在分发链接的 UTM 参数中带入"
+  },
+
+  "spam_controls": [
+    "单邮箱限一次",
+    "异常作答人工抽查：完成时长 < 40 秒 / 自相矛盾组合 / 全选最高档且否认痛点",
+    "已识别的敷衍作答不写入 survey_responses.csv"
+  ]
+}

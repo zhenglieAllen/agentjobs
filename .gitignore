@@ -26,3 +26,8 @@ __pycache__/
 *.swp
 .idea/
 .vscode/
+
+# 验证期运行时数据（可重新采集，不纳入版本控制）
+landing/*.db
+landing/data/
+validation/data/

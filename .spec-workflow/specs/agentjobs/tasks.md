@@ -260,7 +260,7 @@ A1.2 是全局关键路径起点：**验证数据的结构化 schema 必须在�
 
 ## A 轨任务清单
 
-- [ ] 14. [A1.1] 着陆页实现 `[代码]`
+- [x] 14. [A1.1] 着陆页实现 `[代码]`
   - _Prompt: Role: 全栈工程师，专注于验证期落地页实现 | Task: 实现 AgentJobs 着陆页，含 3 个价值主张变体的随机分流与订阅采集 | Restrictions: 不要实现超出落地页的功能；不要引入用户系统；保持单页无框架依赖或使用轻量静态方案 | Success: 着陆页可访问；变体归因可验证（同一访客多次访问命中同一变体）；订阅数据可导出为 CSV | After completing this task, record implementation details with log-implementation tool, then mark this task as complete in tasks.md_
   - 详细需求
     - 3 个变体按 1:1:1 随机分流，变体文案见 risk-analysis.md 实验 1（变体 A 功能向 / B 痛点向 / C 供需向）
@@ -296,7 +296,7 @@ A1.2 是全局关键路径起点：**验证数据的结构化 schema 必须在�
     - **M2 无数据源 → 新增 `social_posts.csv`** 作为第 6 份 schema。`validation-metrics.md`「数据归属与存储」本就要求社媒数据按条目记录，补齐属回归规格。互动率 = (likes+comments+shares)/impressions，逐条计算后取均值；impressions 为 0 的帖子跳过并计入提示。
     - **D2 无数据源 → 明确声明验证期不评估**。D2 依赖平台存在，与 `requirements.md`「窗口区分」一致。H5.1 的结论须显式标注「本次判定未含 D2 终端证据，结论建立在意向证据之上」。**不用 seeding 就绪度作代理**——代理值是意向证据，冒充终端证据会使 risk-analysis.md 风险 4 的防护逻辑失效。
 
-- [ ] 16. [A1.3] 调查问卷题项设计 `[文档]`
+- [x] 16. [A1.3] 调查问卷题项设计 `[文档]`
   - _Prompt: Role: 产品验证专家，专注于问卷设计 | Task: 设计一份关于 AI Agent 开发者求职需求的调查问卷，产出可直接录入问卷工具的题项清单 | Restrictions: 长度控制在 5 分钟内完成；避免引导性问题；选项顺序随机化以抑制顺序偏差；本任务不得调用 log-implementation | Success: 题项清单产出；M3/M4/M12 可从导出结果聚合得出；字段名与 survey_responses.csv 一致_
   - 详细需求
     - 覆盖维度：技能分布、求职行为、平台偏好、痛点识别、付费意愿

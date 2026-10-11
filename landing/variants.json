@@ -1,0 +1,46 @@
+{
+  "_comment": "变体文案出自 risk-analysis.md「实验 1：着陆页价值主张测试」。修改 active 数组即可降级分流（需重启服务）。",
+
+  "active": ["A", "B", "C"],
+
+  "min_visits_before_degrade": 100,
+
+  "variants": {
+    "A": {
+      "id": "A",
+      "angle": "功能向",
+      "headline": "The job board for people who build AI Agents",
+      "subheadline": "一个垂直专注 AI Agent 开发者的求职平台。在别处，你要在数百个通用岗位里筛出寥寥几个；在这里，技能标签从一开始就是 Agent 技术栈。",
+      "points": [
+        "技能标签原生支持 LangChain、AutoGen、ReAct 等 Agent 技术栈",
+        "职位按 Agent 类型与技术深度分类，不混入通用 AI/ML 岗位",
+        "企业用同一套标签描述需求，双方说的是同一种语言"
+      ],
+      "cta": "抢先加入"
+    },
+    "B": {
+      "id": "B",
+      "angle": "痛点向",
+      "headline": "Stop explaining what an AI Agent is in every interview",
+      "subheadline": "每一场面试，你都要花十分钟解释 Agent 是什么、多智能体怎么协作、ReAct 和 ReWOO 有什么区别。雇主雇的是你，面试问的却是你的科普能力。",
+      "points": [
+        "雇主已经理解 Agent 技术栈，不必从基础概念讲起",
+        "简历上的项目经历按 Agent 维度呈现，而不是笼统的「LLM 应用」",
+        "把解释成本还给工程师，而不是花在反复澄清上"
+      ],
+      "cta": "我也不想再解释"
+    },
+    "C": {
+      "id": "C",
+      "angle": "供需向",
+      "headline": "Where AI Agent teams hire",
+      "subheadline": "招一个 Agent 开发者，和招一个普通后端是两个难题。人才池在别处，技能描述在另一边，中间是漫长的搜索和误配。AgentJobs 把两端接上。",
+      "points": [
+        "定向触达正在做 Agent 项目的开发者，而不是泛技术人群",
+        "企业用 Agent 技能标签描述需求，精准命中小众人才",
+        "先有人才，后有职位——供给侧不空转"
+      ],
+      "cta": "看看有哪些机会"
+    }
+  }
+}

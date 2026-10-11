@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>隐私说明 — AgentJobs</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="site">
+  <span class="brand">Agent<span class="brand-dot">Jobs</span></span>
+  <a class="privacy-link" href="/">返回首页</a>
+</header>
+
+<main>
+  <h1>隐私说明</h1>
+  <p class="subheadline">AgentJobs 处于市场验证期。本页说明我们收集哪些数据、为什么收集、以及如何退出。</p>
+
+  <h2>我们收集什么</h2>
+  <ul class="points">
+    <li><strong>邮箱地址</strong> —— 用于在产品上线时通知你。每封邮件都可一键退订。</li>
+    <li><strong>来源渠道</strong> —— 你在订阅表单中选择的「从哪里了解到我们」，用于判断哪个推广渠道有效。</li>
+    <li><strong>价值主张变体</strong> —— 你看到的落地页版本（A/B/C 之一），用于判断哪种产品定位更能驱动订阅。</li>
+  </ul>
+
+  <h2>关于 A/B 归因 Cookie</h2>
+  <p>
+    为了把订阅归因到具体的价值主张变体，我们会在你的浏览器中设置一个名为
+    <code>aj_var</code> 的 Cookie，值是 <code>A</code>、<code>B</code> 或 <code>C</code>。
+  </p>
+  <ul class="points">
+    <li>它只包含变体标识，<strong>不包含任何可识别你身份的信息</strong>。</li>
+    <li>它由服务端设置，带 <code>HttpOnly</code> 与 <code>SameSite=Lax</code> 属性，
+        网页脚本无法读取，有效期 90 天。</li>
+    <li>它的唯一用途是<strong>保证你多次访问时看到同一个版本</strong>——否则同一个人
+        会被计入不同变体，实验结论将失真。</li>
+  </ul>
+  <p>
+    如果你不希望被计入 A/B 实验，清除该 Cookie 即可。但请注意：清除后你再次访问
+    会被随机分配到另一个变体，你的访问记录将分散在多个变体中。
+  </p>
+
+  <h2>我们不做什么</h2>
+  <ul class="points">
+    <li>不使用第三方追踪器、广告像素或跨站行为画像。</li>
+    <li>不把你的邮箱出售或共享给第三方。</li>
+    <li>验证期内不接入任何分析 SDK——流量数据只以汇总计数形式保存。</li>
+  </ul>
+
+  <h2>数据导出与删除</h2>
+  <p>
+    订阅数据保存在我们自建的数据库中，<strong>不以第三方邮件服务商为唯一副本</strong>
+    （按变体归因需要自建存储）。每封通知邮件底部均含退订链接，退订后立即停止发送。
+    如需提前删除你的记录，发送邮件至 privacy@agentjobs.example 即可。
+  </p>
+</main>
+
+<footer class="site">
+  <p>AgentJobs — The job board for people who build AI Agents</p>
+</footer>
+
+</body>
+</html>
