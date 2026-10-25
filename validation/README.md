@@ -30,16 +30,34 @@ python3 -m unittest discover -s validation/tests
 ```
 validation/
 ├── compute_metrics.py          # 指标计算脚本（标准库，无第三方依赖）
+├── interview-guides.md         # 创始人执行物料：H1.1 开发者 / H2.1 企业访谈提纲
+├── survey-distribution.md      # 创始人执行物料：H1.3 问卷投放方案（含 M3 埋点前提）
 ├── schemas/
-│   ├── subscribers.md          # 5 份 schema 文档（含字段定义、指标口径、约束）
+│   ├── subscribers.md          # 6 份 schema 文档（含字段定义、指标口径、约束）
 │   ├── interviews.md
 │   ├── companies.md
 │   ├── survey_responses.md
 │   ├── social_posts.md
 │   ├── competitors.md
+│   ├── competitors-research.md # 任务 18 [A3.1] 竞品公开资料检索结果（36 个平台）
 │   └── templates/*.csv         # 表头模板（可直接复制填写）
 └── tests/test_compute_metrics.py
 ```
+
+## 创始人执行物料（`interview-guides.md` / `survey-distribution.md`）
+
+这两份是**给创始人用的作业指导书**，不是给脚本用的。目的是让采集到的数据
+**直接可聚合**，不必在第 5 周回头返工：
+
+| 文件 | 对应任务 | 覆盖的指标 | 关键提示 |
+|---|---|---|---|
+| `interview-guides.md` | 1 [H1.1]、4 [H2.1] | M4、M5、S1 / M6–M9、S2 | 痛点措辞必须与问卷 Q7 一字不差；M6 与 M8 必须分开问 |
+| `survey-distribution.md` | 3 [H1.3] | S3、M3、M4、M11、M12 | **投放前先确认工具支持「开始」埋点**，否则 M3 不可计算 |
+
+> 物料中已标注两处**竞品检索带来的新风险**（见 `schemas/competitors-research.md`）：
+> ① M6 与 M8 若不分开问，5 家样本下三道供给关卡会退化成一道；
+> ② 问卷 Q9 的选项相对**已运营的垂直竞品**可能已过时，M11 会被系统性压低，
+> 解读时须结合竞品证据，不可直接判失败。
 
 ## 数据流向
 
@@ -51,6 +69,12 @@ validation/
 | `survey_responses.csv` | 任务 3 [H1.3] 投放 + 任务 16 [A1.3] 设计 | 🔴 H 投放 / 🟢 A `[文档]` 设计 | S3、M3、M4（主口径）、M11、M12 |
 | `social_posts.csv` | 创始人手工记录 | — | M2 |
 | `competitors.csv` | 任务 19 [A3.2] | 🟢 A `[文档]` | M10、D1 |
+
+> `competitors.csv` 的**公开资料部分已由任务 18 [A3.1] 完成**（见
+> `schemas/competitors-research.md`，36 个平台）。任务 19 [A3.2] 负责把它与
+> 任务 6/7（H3.1 / H3.2）的真人实操记录合并为最终对比表。
+> **两处关键缺口留给实操**：`satisfaction_score` 全部留空（M10 需要真人打分，
+> 公开资料无法得出），以及 P0 级的 20 项待验证清单。
 
 ## 三条不可违反的约束
 

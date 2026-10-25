@@ -8,12 +8,14 @@
 import csv
 import io
 import json
+import os
 import sys
 import tempfile
 import threading
 import unittest
 from http.client import HTTPConnection
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -284,6 +286,121 @@ class TestHttp(unittest.TestCase):
     def test_unknown_path_404(self):
         status, _, _ = self._req("GET", "/nope")
         self.assertEqual(status, 404)
+
+
+class TestProductionConfig(unittest.TestCase):
+    """生产部署配置 —— 见 landing/DEPLOY.md。
+
+    这些项配错时服务**看起来一切正常**但指标会失效（cookie 无 Secure、
+    数据写到临时盘、变体归因丢失），因此必须有测试钉住。
+    """
+
+    def test_bind_defaults_to_localhost(self):
+        host, port, db = server.resolve_bind({})
+        self.assertEqual(host, "127.0.0.1")
+        self.assertEqual(port, 8000)
+        self.assertTrue(db.name.endswith(".db"))
+
+    def test_bind_reads_container_env(self):
+        host, port, db = server.resolve_bind({
+            "HOST": "0.0.0.0",
+            "PORT": "8080",
+            "DB_PATH": "/data/landing.db",
+        })
+        self.assertEqual(host, "0.0.0.0")
+        self.assertEqual(port, 8080)
+        self.assertEqual(str(db), "/data/landing.db")
+
+    def test_bind_ignores_non_numeric_port(self):
+        _, port, _ = server.resolve_bind({"PORT": "not-a-port"})
+        self.assertEqual(port, 8000, "非法 PORT 应回退默认而非崩溃")
+
+    def test_secure_cookie_flag_reads_env(self):
+        with mock.patch.dict(os.environ, {"AGENTJOBS_SECURE_COOKIES": "1"}):
+            self.assertTrue(server.Config(None, None).secure_cookies)
+        with mock.patch.dict(os.environ, {"AGENTJOBS_SECURE_COOKIES": "true"}):
+            self.assertTrue(server.Config(None, None).secure_cookies)
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertFalse(server.Config(None, None).secure_cookies)
+
+    def test_admin_token_comes_from_env(self):
+        with mock.patch.dict(os.environ, {"AGENTJOBS_ADMIN_TOKEN": "fixed-token"}):
+            self.assertEqual(server.Config(None, None).admin_token, "fixed-token")
+
+
+class TestSecurityHeaders(unittest.TestCase):
+    """生产环境的安全响应头。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.db_path = Path(cls.tmp.name) / "t.db"
+        conn = db.connect(cls.db_path)
+        db.init_db(conn)
+        conn.close()
+
+        server.Handler.config = server.Config(None, None, secure_cookies=True)
+        server.Handler.db_path = cls.db_path
+        server.Handler.limiter = server.RateLimiter(1000)
+
+        cls.httpd = server.ThreadingHTTPServer(("127.0.0.1", 0), server.Handler)
+        cls.port = cls.httpd.server_address[1]
+        cls.thread = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
+        cls.thread.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.httpd.shutdown()
+        cls.httpd.server_close()
+        cls.tmp.cleanup()
+
+    def _get(self, path):
+        conn = HTTPConnection("127.0.0.1", self.port, timeout=5)
+        conn.request("GET", path)
+        r = conn.getresponse()
+        data = r.read()
+        status = r.status
+        hdrs = dict(r.getheaders())
+        conn.close()
+        return status, data, hdrs
+
+    def test_secure_cookie_flagged_when_enabled(self):
+        _, _, hdrs = self._get("/")
+        cookie = hdrs.get("Set-Cookie", "")
+        self.assertIn("aj_var=", cookie)
+        self.assertIn("Secure", cookie, "HTTPS 环境下 cookie 必须带 Secure")
+        self.assertIn("HttpOnly", cookie)
+
+    def test_hsts_only_when_secure_enabled(self):
+        _, _, hdrs = self._get("/")
+        self.assertIn("Strict-Transport-Security", hdrs)
+
+    def test_csp_present_and_blocks_inline_script(self):
+        _, _, hdrs = self._get("/")
+        csp = hdrs.get("Content-Security-Policy", "")
+        self.assertIn("default-src 'self'", csp)
+        self.assertIn("script-src 'self'", csp)
+        self.assertIn("frame-ancestors 'none'", csp)
+        # 严格 CSP 下内联脚本会被拦，故页面不得含内联 <script>
+        self.assertNotIn("unsafe-inline", csp)
+
+    def test_frame_options_deny(self):
+        _, _, hdrs = self._get("/")
+        self.assertEqual(hdrs.get("X-Frame-Options"), "DENY")
+
+    def test_variant_delivered_via_meta_not_inline_script(self):
+        """变体 ID 必须走 <meta>，这样 CSP 才能用 script-src 'self' 而无需 nonce。"""
+        status, body, _ = self._get("/")
+        html = body.decode()
+        self.assertEqual(status, 200)
+        self.assertRegex(html, r'<meta name="aj-variant" content="[ABC]">')
+        self.assertNotIn("window.AJ_VARIANT", html, "不得再有内联脚本注入变体")
+        self.assertNotIn("<script>", html)
+
+    def test_app_js_reads_variant_from_meta(self):
+        js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('meta[name="aj-variant"]', js)
+        self.assertNotIn("window.AJ_VARIANT", js, "app.js 不得再依赖内联脚本的全局变量")
 
 
 if __name__ == "__main__":

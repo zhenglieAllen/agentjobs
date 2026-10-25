@@ -9,6 +9,11 @@
   var channel = document.getElementById("source_channel");
   var submit = form.querySelector("button[type=submit]");
 
+  // 变体 ID 由服务端渲染进 <meta name="aj-variant">。用 meta 而非内联脚本，
+  // 是为了让 CSP 能用严格的 script-src 'self'，不需要 nonce 管理。
+  var variantMeta = document.querySelector('meta[name="aj-variant"]');
+  var variant = variantMeta ? variantMeta.getAttribute("content") : "";
+
   function say(text, kind) {
     msg.textContent = text;
     msg.className = "form-msg " + (kind || "");
@@ -37,7 +42,7 @@
       body: JSON.stringify({
         email: email.value.trim(),
         source_channel: channel.value,
-        ab_variant: window.AJ_VARIANT || "",
+        ab_variant: variant,
         company: document.getElementById("company").value
       })
     })

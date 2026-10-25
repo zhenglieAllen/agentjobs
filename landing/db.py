@@ -59,9 +59,21 @@ def now_iso() -> str:
 
 
 def connect(db_path: str | Path) -> sqlite3.Connection:
-    conn = sqlite3.connect(str(db_path))
+    conn = sqlite3.connect(str(db_path), timeout=30)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    # 生产环境是 ThreadingHTTPServer：订阅写入与访问计数写入会并发发生。
+    # 默认的 rollback journal 模式下并发写会直接抛 "database is locked"，
+    # 而 busy_timeout 只是在超时后报错，不解决阻塞。WAL 允许「一写多读」
+    # 并发，是单文件 SQLite 用于生产的标准配置。
+    conn.execute("PRAGMA busy_timeout = 30000")
+    try:
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA synchronous = NORMAL")
+    except sqlite3.DatabaseError:
+        # WAL 依赖本地文件系统的共享内存，个别文件系统（部分网络卷）不支持。
+        # 这不是致命错误——退回默认 journal 模式仍可工作，只是并发写能力下降。
+        pass
     return conn
 
 

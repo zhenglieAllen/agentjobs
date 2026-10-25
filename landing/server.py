@@ -55,6 +55,14 @@ COOKIE_MAX_AGE = 60 * 60 * 24 * 90  # 90 天，覆盖整个 30 天验证窗口
 RATE_LIMIT_PER_HOUR = 10
 
 
+def env_flag(name: str, default: bool = False) -> bool:
+    """读布尔型环境变量。接受 1/true/yes/on（大小写不敏感）。"""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
 def load_variants(path: Path | None = None) -> tuple[dict, tuple[str, ...], int]:
     cfg = json.loads((path or ROOT / "variants.json").read_text(encoding="utf-8"))
     variants = cfg["variants"]
@@ -68,7 +76,8 @@ def load_variants(path: Path | None = None) -> tuple[dict, tuple[str, ...], int]
 
 
 class Config:
-    def __init__(self, variants_path: Path | None, active_override: str | None):
+    def __init__(self, variants_path: Path | None, active_override: str | None,
+                 secure_cookies: bool | None = None):
         self.cfg, active, self.min_visits = load_variants(variants_path)
         if active_override:
             picked = tuple(v.strip().upper() for v in active_override.split(",") if v.strip())
@@ -81,6 +90,11 @@ class Config:
         self.active = active
         self.variants = self.cfg["variants"]
         self.admin_token = os.environ.get("AGENTJOBS_ADMIN_TOKEN") or secrets.token_urlsafe(24)
+        # 生产环境（HTTPS 终止在反向代理上）必须给 cookie 加 Secure，
+        # 否则明文 HTTP 也能带上归因 cookie，归因可信度与 PII 保护都受影响。
+        self.secure_cookies = (
+            env_flag("AGENTJOBS_SECURE_COOKIES") if secure_cookies is None else secure_cookies
+        )
 
     def pick(self, cookie_value: str | None) -> str:
         """决定本次访问的变体：cookie 有效则沿用，否则在活跃变体中随机。"""
@@ -143,6 +157,21 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
+        self.send_header("X-Frame-Options", "DENY")
+        # 严格 CSP：脚本与样式只允许同源。页面已无内联脚本（变体走 <meta> 下发），
+        # 因此不需要 nonce，也就不存在 nonce 泄漏导致的绕过。
+        self.send_header(
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self'; style-src 'self'; "
+            "img-src 'self' data:; connect-src 'self'; form-action 'self'; "
+            "base-uri 'none'; frame-ancestors 'none'; object-src 'none'",
+        )
+        if self.config.secure_cookies:
+            # 仅在确认走 HTTPS 时下发 HSTS，否则本地 HTTP 开发会被浏览器记住
+            # 而无法回退到明文。
+            self.send_header(
+                "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
+            )
         for k, v in (extra_headers or {}).items():
             self.send_header(k, v)
         self.end_headers()
@@ -226,15 +255,18 @@ class Handler(BaseHTTPRequestHandler):
 
         html = render((STATIC / "index.html").read_text(encoding="utf-8"), variant)
         # 变体随 HTML 一起下发并缓存，保证同一访客不会因 CDN 缓存串变体
+        cookie = (
+            f"{VARIANT_COOKIE}={variant_id}; Path=/; Max-Age={COOKIE_MAX_AGE};"
+            f" HttpOnly; SameSite=Lax"
+        )
+        if self.config.secure_cookies:
+            cookie += "; Secure"
         self._send(
             HTTPStatus.OK,
             html.encode("utf-8"),
             "text/html; charset=utf-8",
             {
-                "Set-Cookie": (
-                    f"{VARIANT_COOKIE}={variant_id}; Path=/; Max-Age={COOKIE_MAX_AGE};"
-                    f" HttpOnly; SameSite=Lax"
-                ),
+                "Set-Cookie": cookie,
                 "Cache-Control": "private, no-cache",
                 "Vary": "Cookie",
             },
@@ -332,11 +364,27 @@ class Handler(BaseHTTPRequestHandler):
                    {"ok": True, "created": created, "message": reason})
 
 
+def resolve_bind(env: dict | None = None) -> tuple[str, int, Path]:
+    """从环境变量解析监听地址与数据库路径。
+
+    容器平台（Railway / Render）注入 PORT 与 HOST，DB_PATH 指向持久卷。
+    抽成独立函数是为了能直接单测，而不必启动服务器。
+    """
+    env = os.environ if env is None else env
+    host = env.get("HOST", "127.0.0.1")
+    port_raw = env.get("PORT", "").strip()
+    port = int(port_raw) if port_raw.isdigit() else 8000
+    db_path = Path(env.get("DB_PATH", str(ROOT / "landing.db")))
+    return host, port, db_path
+
+
 def main(argv: list[str] | None = None) -> int:
+    # 环境变量提供默认值，命令行参数优先覆盖。
+    env_host, env_port, env_db = resolve_bind()
     ap = argparse.ArgumentParser(description="AgentJobs 着陆页（任务 14 / A1.1）")
-    ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=8000)
-    ap.add_argument("--db", type=Path, default=ROOT / "landing.db")
+    ap.add_argument("--host", default=env_host)
+    ap.add_argument("--port", type=int, default=env_port)
+    ap.add_argument("--db", type=Path, default=env_db)
     ap.add_argument("--variants", type=Path, default=None, help="variants.json 路径")
     ap.add_argument("--active", default=None, help="覆盖分流变体，如 A,B（降级分流用）")
     ap.add_argument("--print-token", action="store_true", help="启动后打印管理令牌")
@@ -366,6 +414,14 @@ def main(argv: list[str] | None = None) -> int:
         f"\n着陆页：http://{args.host}:{args.port}/",
     ):
         print(line, flush=True)
+
+    if not os.environ.get("AGENTJOBS_ADMIN_TOKEN"):
+        print(
+            "⚠️  未设置 AGENTJOBS_ADMIN_TOKEN，本次启动使用随机令牌。"
+            "重启后会变更——生产环境请显式设置该环境变量。",
+            file=sys.stderr,
+            flush=True,
+        )
 
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)
     try:

@@ -1,0 +1,24 @@
+# 构建上下文为仓库根，但 Dockerfile 只 COPY landing/，这里仍排除掉
+# 体积大或不该进镜像的内容。
+.git/
+.gitignore
+.omo/
+.omx/
+.spec-workflow/
+docs/
+validation/
+survey/
+**/__pycache__/
+**/*.py[cod]
+
+# 运行期数据绝不入镜像
+**/*.db
+**/*.db-wal
+**/*.db-shm
+**/data/
+
+# 平台描述文件不是镜像的一部分
+landing/Dockerfile
+landing/DEPLOY.md
+railway.json
+render.yaml

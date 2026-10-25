@@ -39,8 +39,13 @@ AGENTJOBS_ADMIN_TOKEN=固定令牌 python3 landing/server.py   # 固定管理令
 - **自带 SQLite**：按变体归因需要自建存储，`sqlite3` 是标准库自带的
 - **与 `validation/` 同栈**：两个子系统都是 Python 3，导出→聚合的链路无需跨语言胶水
 
-> 若任务 17 [A1.4] 最终选定 Node.js/FastAPI 栈，本目录需按新栈重写。
-> 届时 `subscribers.csv` 的**列名契约不变**，`validation/` 无需改动。
+> **任务 17 [A1.4] 已定档（2026-10-25）**：平台期后端选定 **Python 3.12 + FastAPI**
+> （详见 `.spec-workflow/specs/agentjobs/tech-decision.md`）。
+> **验证期着陆页不重写为 FastAPI**——重写是纯风险零收益：M1 数据完全依赖本服务，
+> 重写期间不可用就是一天的数据损失；且平台期本来就要写 FastAPI 后端，
+> 把订阅 API 一次性写进去比先写一遍标准库再重写一遍更省。
+> **唯一跨栈约束**：`subscribers` 表列名在验证期 SQLite 与平台期 Alembic 初始迁移之间
+> 必须逐字一致，权威定义见 `validation/schemas/subscribers.md`。
 
 ## 目录结构
 
@@ -49,6 +54,9 @@ landing/
 ├── server.py           # HTTP 服务：路由、服务端分流、API
 ├── db.py               # subscribers 表 + 访问计数 + CSV 导出
 ├── variants.json       # 三个变体的文案与分流配置（文案出自 risk-analysis.md 实验 1）
+├── Dockerfile          # 生产镜像（构建上下文为仓库根）
+├── DEPLOY.md           # 部署步骤（Railway 推荐 / Render 备选）+ 每周导出回灌
+├── PROMO.md            # 推广手册：渠道、文案、每日节奏、渠道归因规则
 ├── static/
 │   ├── index.html      # 落地页模板（占位符由服务端替换）
 │   ├── privacy.html    # 隐私声明（说明 A/B 归因 cookie）
@@ -56,6 +64,31 @@ landing/
 │   └── app.js          # 仅负责表单提交，不参与分流逻辑
 └── tests/test_landing.py
 ```
+
+## 上线（当前最紧要的一步）
+
+M1（着陆页订阅数）的数据**只能由一个公网可访问的着陆页产生**。
+代码已完成，但未部署前任务 2 [H1.2] 无法开始，第 1 周就在空转。
+
+- **部署步骤** → `landing/DEPLOY.md`（含持久卷要求、环境变量、部署后验证清单、故障排查）
+- **推广步骤** → `landing/PROMO.md`（渠道文案、每日节奏、`source_channel` 归因规则）
+
+镜像已在本地构建并验证通过：
+
+```bash
+docker build -f landing/Dockerfile -t agentjobs-landing .
+docker run -d -p 8000:8000 \
+  -e PORT=8000 -e HOST=0.0.0.0 \
+  -e AGENTJOBS_ADMIN_TOKEN=<令牌> -e AGENTJOBS_SECURE_COOKIES=1 \
+  agentjobs-landing
+```
+
+**生产环境的两个硬性配置**（配错时服务看起来正常，但数据会失效）：
+
+| 配置 | 不配的后果 |
+|---|---|
+| 持久卷挂到 `/data`（`DB_PATH=/data/landing.db`） | 容器重启即清空全部订阅，M1 随之失效且不易察觉 |
+| `AGENTJOBS_SECURE_COOKIES=1` | HTTPS 下 cookie 不带 `Secure`，归因 cookie 可被明文 HTTP 携带 |
 
 ## 需求对照
 

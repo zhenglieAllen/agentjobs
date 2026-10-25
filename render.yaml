@@ -1,0 +1,26 @@
+# AgentJobs 着陆页 —— Render Blueprint（备选部署目标）
+#
+# 主目标平台是 Railway（见 railway.json）。选 Railway 的理由见
+# .spec-workflow/specs/agentjobs/tech-decision.md 第 7 节：
+# Render 的免费 web service 会休眠（首请求有数秒延迟），且免费档没有持久磁盘。
+#
+# 渲染方式：Render Dashboard → New → Blueprint，指向本仓库。
+services:
+  - type: web
+    name: agentjobs-landing
+    runtime: docker
+    dockerfilePath: ./landing/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /healthz
+    envVars:
+      # 生产环境走 HTTPS，cookie 必须带 Secure
+      - key: AGENTJOBS_SECURE_COOKIES
+        value: "1"
+      # 管理令牌由 Render 生成并存入 secret，勿手工改写
+      - key: AGENTJOBS_ADMIN_TOKEN
+        generateValue: true
+    disk:
+      name: landing-data
+      mountPath: /data
+      sizeGB: 1
