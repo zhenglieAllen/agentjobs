@@ -312,7 +312,7 @@ A1.2 是全局关键路径起点：**验证数据的结构化 schema 必须在�
   - > **不调用 `log-implementation`**（文档子轨，五个 artifact 字段全为空）。产出以普通 git commit 记录。
   - > **指标缺口修复**：旧版任务与 `risk-analysis.md` 实验 3 假设「70% 受访者评分 7 分以上（10 分制）」，但问卷中无此题项，该假设不可测量。现改用 M4 并明确要求加入对应题项。
 
-- [ ] 17. [A1.4] 技术选型定档 `[文档]`
+- [x] 17. [A1.4] 技术选型定档 `[文档]`
   - _Prompt: Role: 技术负责人，负责任务分解中技术选型的收敛 | Task: 将 design.md「技术选型建议」中的或式候选项收敛为单一确定方案，产出选型决策文档 | Restrictions: 本任务不得调用 log-implementation | Success: 全部候选项收敛为单一方案；每个决策有理由与否决记录；与 mvp-boundaries.md 技术边界无冲突_
   - 详细需求
     - 需定档的候选项：后端（Node.js+Express 或 Python+FastAPI）、前端（React 或 Vue）、样式（Tailwind 或 Bootstrap）、部署（Vercel/Netlify 前端 + Railway/Render 后端 + Supabase/PlanetScale 数据库）

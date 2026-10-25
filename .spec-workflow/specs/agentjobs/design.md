@@ -231,24 +231,35 @@ subscribers (
 
 > 旧版前端设计只列平台页面，漏掉了验证期真正需要的着陆页与问卷页，导致第 1-4 周无页面设计依据。现补齐。
 
-## 技术选型建议 (最小化)
+## 技术选型 (已定档)
 
-> **待定**：本节仍为"或"式候选（Node/Express 或 Python/FastAPI、React 或 Vue、Vercel 或 Netlify）。选型未决会阻塞开发期启动，需在**第 4 周判定通过后立即定档**，并在 `tasks.md` 阶段 4 中作为独立任务记录。此为已知缺口，本次一致性修复不强行替决策者选择。
+> **定档完成（任务 17 [A1.4]）**：本节原为"或"式候选，已收敛为单一方案。
+> **完整决策记录见 `tech-decision.md`** —— 含每项决策的选择理由、被否方案与否决理由、
+> 验证期/平台期两阶段差异、Redis 取舍结论、以及与 `mvp-boundaries.md` 技术边界的逐条核对。
+> 本节仅保留结论摘要。
 
 ### 后端
-- Node.js + Express 或 Python + FastAPI
-- PostgreSQL 作为主数据库
-- Redis 用于缓存
+- **Python 3.12 + FastAPI**（否决 Node.js + Express；理由见 `tech-decision.md` 第 1 节）
+- SQLAlchemy 2.0 (ORM) + Alembic (迁移) + Pydantic v2 (校验)
+- PostgreSQL 作为主数据库 —— **Supabase Postgres**（托管），**不使用 Supabase Auth**，自建 JWT + bcrypt 认证
+- **不使用 Redis** —— MVP 负载（1000 用户 / 每天 100 次职位浏览）下 Postgres 索引已足够，
+  引入缓存的运维成本高于收益。重新评估的触发条件见 `tech-decision.md` 第 6 节
 
 ### 前端
-- React 或 Vue.js (单页应用)
-- Tailwind CSS 或 Bootstrap 用于样式
+- **React 19 + Vite + TypeScript**（否决 Vue 3；理由见 `tech-decision.md` 第 3 节）
+- **Tailwind CSS v4**（否决 Bootstrap 5）
+- 状态管理保持简单：`useState` / `useContext`，不引 Redux / Zustand / React Query
 - UI 语言 zh-CN 单语言，不引入 i18n 框架（与 `requirements.md` 语言边界一致）
 
 ### 部署
-- Vercel/Netlify (前端)
-- Railway/Render (后端)
-- Supabase/PlanetScale (数据库)
+- **Vercel**（前端）+ **Railway**（后端 web + worker，同一镜像不同启动命令）+ Supabase（数据库）
+- 不使用容器编排（与 `mvp-boundaries.md` 部署边界一致）
+
+### 验证期与平台期是两个栈
+验证期（第 1-4 周）着陆页为 **Python 标准库 + SQLite 的独立单容器**，**不重写为 FastAPI**——
+重写是纯风险零收益（详见 `tech-decision.md` 第 8 节）。
+唯一跨栈约束：`subscribers` 表列名在验证期 SQLite 与平台期 Alembic 初始迁移之间必须逐字一致，
+权威定义见 `validation/schemas/subscribers.md`。
 
 ## 验证策略
 
