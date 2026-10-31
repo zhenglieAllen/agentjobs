@@ -358,7 +358,9 @@ SCHEMAS: dict[str, Schema] = {
             Column("skill_tag_support", "text", required=False),
             Column("differentiation", "list", required=False,
                    note=f"以 {LIST_SEP} 分隔；D1 去重计数。无观察到的差异化点时留空，不得填推测值"),
-            Column("satisfaction_score", "float", lo=1, hi=10, note="M10：用户对现有平台满意度"),
+            Column("satisfaction_score", "float", required=False, lo=1, hi=10,
+                   note="M10：用户对现有平台满意度。未实操打分的平台留空"
+                        "（公开资料无法得出，须真人实操），M10 按已打分平台的均值计算"),
             Column("evidence_url", "text"),
         ],
     ),

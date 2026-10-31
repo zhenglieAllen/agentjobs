@@ -205,6 +205,25 @@ class TestSchemaValidation(unittest.TestCase):
             cm.load_csv(self.dir, "competitors")
         self.assertIn("templates/competitors.csv", str(ctx.exception))
 
+    def test_unscored_competitor_may_be_left_empty(self):
+        """未实操打分的平台留空必须合法。
+
+        任务 19 [A3.2] 的输入天然是「公开资料已填、satisfaction_score 待实操」，
+        若该列必填，整个 schema 校验会先于指标计算失败（exit 2），打分表根本跑不出来。
+        """
+        write_data(self.dir, competitors=[
+            {"platform": "A", "job_types_covered": "x", "agent_job_availability": "y",
+             "skill_tag_support": "z", "differentiation": "", "satisfaction_score": "4",
+             "evidence_url": "https://a"},
+            {"platform": "B", "job_types_covered": "x", "agent_job_availability": "y",
+             "skill_tag_support": "z", "differentiation": "", "satisfaction_score": "",
+             "evidence_url": "https://b"},
+        ])
+        rows = cm.load_csv(self.dir, "competitors")
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["satisfaction_score"], 4.0)
+        self.assertIsNone(rows[1]["satisfaction_score"])
+
 
 class TestCompute(unittest.TestCase):
     """指标计算与判定规则。"""
@@ -282,6 +301,21 @@ class TestCompute(unittest.TestCase):
         got = {r.key: r.value for r in rep.results}
         self.assertAlmostEqual(got["M10"], 5.0)
         self.assertEqual(got["D1"], 2)  # 去重后 2 个差异化点
+
+    def test_m10_uses_only_scored_platforms(self):
+        """实操未打分的平台留空时，M10 按已打分平台计算，不得按 0 计入。"""
+        rep = self._rep(competitors=[
+            {"platform": "A", "job_types_covered": "x", "agent_job_availability": "y",
+             "skill_tag_support": "z", "differentiation": "标签筛选", "satisfaction_score": "4",
+             "evidence_url": "https://a"},
+            {"platform": "B", "job_types_covered": "x", "agent_job_availability": "y",
+             "skill_tag_support": "z", "differentiation": "", "satisfaction_score": "",
+             "evidence_url": "https://b"},
+        ])
+        got = {r.key: r.value for r in rep.results}
+        self.assertAlmostEqual(got["M10"], 4.0)
+        m10 = next(r for r in rep.results if r.key == "M10")
+        self.assertIn("1 个平台", m10.detail)
 
     def test_sample_shortfall_advisory_not_failure(self):
         """S1 未达标时不得判失败，且 M5 应带样本量提示。"""
