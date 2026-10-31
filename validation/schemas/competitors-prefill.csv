@@ -1,0 +1,37 @@
+platform,job_types_covered,agent_job_availability,skill_tag_support,differentiation,satisfaction_score,evidence_url
+Agentic Engineering Jobs (agenticengineeringjobs.com),Agentic AI 工程师;Agent 架构师;AgentOps;Agentic Workflow;Agent PM;Prompt/LLM 工程师,yes（官方自述 200 个在招 agentic 岗位）,partial（仅关键词+角色+remote 筛选；未见 LangChain/LangGraph/MCP 等技能标签体系）,,,https://agenticengineeringjobs.com/llm-info
+Agentic Engineering Jobs (agentic-engineering-jobs.com),Agentic AI 工程师;LangGraph/CrewAI/Pydantic AI 栈使用者,yes（官方自述 500+ 在招）,yes（agentic-stack 筛选明确列出 LangGraph、CrewAI、Pydantic AI、RAG、multi-agent、LLM observability、evals）,,,https://agentic-engineering-jobs.com/about
+AgenticCareers (agenticcareers.co),AI Agent 工程师;Agentic Systems Architect;LLM Ops Lead,yes（自述追踪 14 个来源共 2962 个在招岗位、890 家公司；30 天内新增 2065）,partial（提供角色类别、资历、薪酬披露、远程、新鲜度、雇主段位等分面及公司阶段与栈筛选；未见 LangChain 级标签体系）,,,https://agenticcareers.co/state-of-agentic-hiring
+AI Native Builder (ai-native-builder.com/ai-agent-jobs),Tool-using agents 工程师;LLM 应用工程师;多智能体工作流工程师;评测工程师;Agentic coding 开发者,yes（页面标注 300 个在招岗位、其中 77 个远程）,yes（岗位标签含 AI Agents / Agentic Coding / No-Code-Low-Code AI；工具标签含 Claude Code、Codex、LangGraph、Cursor、LangChain）,,,https://www.ai-native-builder.com/ai-agent-jobs
+AI Dev Jobs (aidevboard.com),AI 工程岗位（LLM/agent/infra/研究类技术岗）,yes（自述 9384 个岗位、551 家公司）,yes（暴露 57 个 stack 中的子集，含 LLM、Agents、RAG、MLOps、Fine-Tuning、PyTorch、NLP Stack；MCP 为集成协议而非可搜索标签）,,,https://aidevboard.com
+LLMHire (llmhire.com),AI/agent 方向 AI 工程师,yes（自述聚合 170+ 家公司；技能需求分布基于 1247 个 agent 工程岗位）,partial（技能需求以报告形式呈现；站内实际筛选项与标签体系未在页面说明）,,,https://llmhire.com/blog/ai-agent-engineer-most-wanted-role-april-2026
+AIJobs.ai (aijobs.ai),AI/ML 岗位,partial（有机器学习分类；是否有 AI Agent 岗位未能从公开资料确认）,unknown（是否有 AI Agent / LangChain / MCP 级技能标签未能从公开资料确认）,,,https://theairegistry.com/tools/aijobsai
+Foorilla（原 ai-jobs.net）,AI & Machine Learning 专区岗位;DevOps;Help Desk;通用技术岗,partial（已非 AI 专属；AI 岗与通用技术岗并列）,partial（旧站曾提供 LLM/RAG 技能过滤页；当前站内标签粒度未确认）,,,https://jobsitedir.com/jobboard/foorilla.com
+"80,000 Hours Job Board (80000hours.org)",Technical AI Safety Research;AI Governance & Policy;AI Security;AI Hardware;TAI/AI 安全岗,partial（偏 AI 安全方向；Agent 工程岗覆盖度未确认）,partial（2026-07 起加大 AI 聚焦；未见 agent 级技能标签体系）,,,https://80000hours.org/
+AgentJobs.com（同名占位站）,unknown（仅 Launching soon 占位页，无岗位、无筛选、无定价）,unknown,unknown,,,https://agentjobs.com
+JobForAgent.com,面向自主 AI agent 的岗位（招聘对象是 AI Agent 本身而非 agent 开发者）,no（不服务 agent 开发者求职）,unknown,,,http://jobforagent.com/presskit
+DigitalJobs.com,面向人类与 AI agent 的数字工作岗,no（不服务 agent 开发者求职）,unknown,,,https://www.jobboardhive.com/?p=2375
+No Code Jobs (nocodejobs.org),低代码/无代码方向岗（另提供 agent 可读 jobs.json feed 与 MCP 集成）,no（不服务 agent 开发者求职）,unknown,,,https://www.bestaifor.com/directory/no-code-jobs
+Humanless (gohumanless.ai),unknown（仅见名称与一句话定位；无可核实的岗位量与筛选资料）,no（不服务 agent 开发者求职）,unknown,,,https://www.jobboardhive.com/?p=2375
+AI Jobs UK (artificialintelligencejobs.co.uk),AI 岗位,partial,unknown（技能标签体系未见公开资料）,,,https://artificialintelligencejobs.co.uk/hire/pricing
+Jobs in AI (jobsinai.com),AI 岗位,partial,unknown（筛选与标签粒度未公开）,,,https://www.jobsinai.com/pricing
+LinkedIn,全行业岗位（无 AI/Agent 专属分类）,partial（岗位 skills 数组仅约 50% 被填充；未检索到官方 AI Agent 岗位筛选器）,partial（Recruiter 侧有 AI-Assisted Search 自然语言检索与技能筛选；未见 agent 栈级标签）,,,https://www.linkedin.com/help/recruiter/answer/a6513108
+Indeed,通用岗位（AI/ML 岗混在各类目下）,partial（官方无独立 AI 筛选器；AI 岗只能靠关键词命中）,no（筛选项为薪资、工作设置、工作领域、职位类型、学历、发布日期与 title: 等高级语法）,,,https://www.indeed.com/help/job-seekers/articles/204488950
+Glassdoor,通用岗位（未检索到 AI jobs 专区）,partial,no（未检索到 AI 专属筛选面；Glassdoor Recruiter 属招聘方侧 AI 而非岗位标签体系）,,,https://hrtechfeed.com/glassdoor-launches-ai-driven-glassdoor-recruiter-to-end-job-search-burnout-and-mass-applications
+ZipRecruiter,通用岗位（无 AI Agent 专属专区）,partial,no（筛选维度为职位类型、距离、发布日期、薪资、远程、雇佣类型；无技能标签筛选）,,,https://www.joveo.com/blog/job-search-inside-chatgpt
+BOSS直聘 (zhipin.com),通用岗位（含 AI Agent 产品经理、大模型算法工程师、agent 算法等具体岗位）,partial（Agent 岗位存在但无独立专区）,unknown（技能标签筛选粒度需实操验证）,,,https://www.zhipin.com/job_detail/97ac8240ab1c2a2703R_0ty5FVFX.html
+脉脉 (Maimai),AI 新经济岗位（报告发布方而非 agent 岗位招聘板；无 Agent 专区）,partial,unknown,,,https://www.workercn.cn/c/2026-09-17/8895694.shtml
+Wellfound (原 AngelList Talent),初创公司全类型岗位（无 agent 专属标签）,partial（审计实测远程 AI Engineer 6701 条、远程 ML Engineer 302 条；数量按宽泛标题口径计）,partial（支持角色、远程、薪资、股权、融资阶段筛选；未见 agent 专属标签）,,,https://www.cloudspress.com/angellist-explained-venture-infrastructure-startup-tools-and-what-happened-to-angellist-jobs
+YC Work at a Startup,YC 公司早期岗位（列表需登录个人档案后可见）,partial,no（无任何技能标签体系）,,,https://theairankings.com/ai-jobs/machine-learning-jobs
+Welcome to the Jungle（含 Otta）,欧洲技术/产品/设计岗位（AI/ML 岗混在 Software Engineering / Data 等类目下）,partial,no（可按关键词、城市、国家、合同类型、remoteOnly 筛选；未发现 AI/Agent 专属筛选面）,,,https://apify.com/glasswing/welcome-to-the-jungle-jobs/api/openapi
+Remote OK (remoteok.com),仅远程岗位（官方分类 exec/medical/finance/education/ops/marketing/design/dev；无官方 remote AI jobs 类目）,partial（AI 岗靠雇主自设标签：python/llm/machine-learning/ai/gpt/ml 等，每岗 3-8 个）,partial（标签由雇主自设；公开 API 支持 ?tag= 查询；是否有 agent 级标签需实操验证）,,,https://apify.com/slate_cyclone/remoteok-jobs-scraper
+We Work Remotely (weworkremotely.com),仅远程岗位（AI 岗混在 Programming 类目）,partial,no（无独立 AI/ML 分类；搜索基础、无技能栈筛选）,,,https://www.remogrid.com/blog/reviews/we-work-remotely-review-2026-job-board-quality
+Hacker News「Who is hiring」,社区自发雇主帖与候选人帖（含 AI 语音/面貌 agent、AI Engineer agentic systems 岗位）,partial,no（纯文本帖子，无筛选、无标签、无结构化岗位字段）,,,https://news.ycombinator.com/item?id=50004401
+Built In,ML Engineer;AI Engineer;Applied Scientist;MLOps,partial（ML 分类 50 页、ML Engineer 73 页；无 AI Agent 专属分类）,no,,,https://theairankings.com/ai-jobs/machine-learning-jobs
+Stack Overflow Jobs (stackoverflow.jobs),unknown（存在性存疑：直连返回 HTTP 403；既有已关停说法也有活跃说法）,unknown,unknown（第三方称支持 machine-learning / AI / NLP / PyTorch 标签，未能复核）,,,https://theairankings.com/ai-jobs/machine-learning-jobs
+Levels.fyi Jobs,薪酬数据岗位库（以 ML/AI 岗位为主；非岗位发现工具）,partial,no（以薪资数据为核心，无技能标签）,,,https://theairankings.com/ai-jobs/machine-learning-jobs
+Arc.dev,远程优先开发者自由职业岗（AI 岗覆盖弱）,partial,unknown（未见 agent 级技能标签体系；用 HireAI 做匹配）,,,https://arc.dev/employer-blog/contra-alternatives/
+Braintrust,AI/ML 方向自由职业岗,partial,yes（以已验证技能为核心的结构化画像；技能导向的匹配是其主要卖点）,,,https://www.secondtalent.com/resources/7-best-freelance-platforms-ai-developers
+Toptal,高阶外包/合同技术岗,partial,unknown（无公开标签体系说明）,,,https://cadence.withremote.ai/blog/arc-vs-toptal
+Contra,独立开发者/小型团队岗,partial,no（作品集+客户评价审核；对比表明确指出其在 AI 原生岗位寻访与审核深度上较弱）,,,https://arc.dev/employer-blog/contra-alternatives/
+Honeypot (honeypot.io),德语区/荷兰语区开发者岗（开发者反向市场；企业带薪资来申请）,partial,no（无 AI/Agent 专属专区；AI 岗混在科技岗中）,,,https://www.webfolio.to/tools/ai-jobsnet

@@ -294,8 +294,33 @@
 
 ## 7. 移交说明（给任务 19 [A3.2]）
 
-1. 本文件 §2 的三张表按顺序拼接即为 `competitors.csv` 的**候选行**，`source_url` → `evidence_url`。
-2. `agent_job_availability` 与 `skill_tag_support` 使用受控值 `yes / partial / no / unknown`，与任务 19 的口径一致。
+1. 本文件 §2 的三张表已结构化为 **`competitors-prefill.csv`**（36 行，5 列已填），任务 19 在其上补两列即可，无需重复录入。
+2. `agent_job_availability` 与 `skill_tag_support` 使用受控值 `yes / partial / no / unknown`，与任务 19 的口径一致。预填表中在受控值后附了粒度说明（括号内），便于实操时对照核实。
 3. **`satisfaction_score` 列本文件不产出**，须等待任务 6 [H3.1] 与任务 7 [H3.2] 的真人实操记录。
-4. `differentiation` 列由任务 19 依据本文件 `notes` 与实操截图统一措辞后填写，**必须使用受控词表**（建议受控词：`Agent 岗位专区`、`Agent 技能标签筛选`、`Agent 角色分类法`、`薪资透明`、`远程筛选`、`框架标签（LangChain/LangGraph 等）`、`MCP/结构化数据接口`、`AI 助手可检索`、`双轨人群（人+Agent）`、`agent 岗位打分器`），否则 D1 去重计数失效。
+4. `differentiation` 列由任务 19 依据本文件 `notes` 与实操截图统一措辞后填写，**必须使用受控词表**，否则 D1 去重计数失效（`compute_metrics.py` 按字符串精确去重）。
+   > **受控词表已随 D1 基准变更而更新（2026-10-31）**：差异化点的参照物改为**垂直竞品**（见 `validation-metrics.md` D1 条目与 `schemas/competitors.md`「D1 计点规则」）。因此本文件原建议的受控词中，**`Agent 岗位专区`、`Agent 技能标签筛选`、`Agent 角色分类法`、`框架标签（LangChain/LangGraph 等）` 四项不再计入 D1**——五家垂直竞品已提供且粒度不逊（agentic 专属岗位分面、7 类角色分类法、LangGraph/CrewAI/Pydantic AI 栈筛选、Claude Code/Codex/Cursor 工具标签）。继续按旧参照系计点会得出「差异化已成立」的错误结论。
+   >
+   > 修正后的受控词表建议（全部须在垂直竞品基准下成立）：`统一 Agent 技能标签本体`、`岗位数据可被机器消费（MCP/REST/JSON 导出）`、`跨平台技能标签归一`、`岗位语义结构（可被 LLM 直接引用）`、`显式薪资区间`、`agent 岗位专用检索接口`、`面向 agent 开发者的双向评价与作品集`、`按 agent 技术栈深度分类而非仅按角色`。
 5. 本文件标记为 **P0 的验证项（V1–V8）建议在任务 19 之前完成**，因为它们直接决定「差异化是否成立」的结论是否需要改写。
+6. §5 第 2 条给出的定位（「技能本体不统一 + 岗位数据不可被机器消费」）与新的 D1 基准方向一致，可直接作为受控词表的前两项来源。
+
+---
+
+## 8. 预填表说明（`competitors-prefill.csv`）
+
+| 列 | 状态 | 来源 |
+|---|---|---|
+| `platform` | ✅ 已填 | 本文件 §2 三表的平台名，逐字对齐 |
+| `job_types_covered` | ✅ 已填 | 本文件 `positioning` + `target_users` + `notes` 中的岗位分类信息 |
+| `agent_job_availability` | ✅ 已填 | 本文件 `agent_job_availability`（yes/partial/no/unknown）+ 规模自述 |
+| `skill_tag_support` | ✅ 已填 | 本文件 `skill_tag_support` + `notes` 中的标签粒度描述 |
+| `evidence_url` | ✅ 已填 | 本文件 `source_url` |
+| `differentiation` | ⬜ 留空 | D1 计点须逐条给出垂直竞品基准证据（见 §7 第 4 条） |
+| `satisfaction_score` | ⬜ 留空 | M10 属真人实操指标（见 §6.4） |
+
+```bash
+cp validation/schemas/competitors-prefill.csv validation/data/competitors.csv
+python3 validation/compute_metrics.py --data-dir validation/data
+```
+
+> 该预填表已通过 `compute_metrics.py` 的真实 schema 校验（36 行、7 列、表头与 schema 逐字一致）。此前 `satisfaction_score` 被声明为必填，会使「公开资料已填、满意度待实操」这一必然的中间状态直接触发 schema 错误（退出码 2），打分表根本跑不出来；该列已改为可空，M10 按已打分平台的均值计算。

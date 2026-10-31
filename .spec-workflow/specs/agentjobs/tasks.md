@@ -1,6 +1,18 @@
-# AgentJobs 任务分解 - 30 天市场验证（双轨道）
+# AgentJobs 任务分解 - 市场验证（双轨道）
 
 > **时间线对齐**：第 1-4 周为验证期，第 5 周为决策 Gate，与 `mvp-boundaries.md`「时间边界」、`validation-metrics.md` Week 1-4 一致。**平台开发不在本文件内**，其任务分解在验证通过后另行编写。
+>
+> **绝对日期（2026-10-31 裁定）**：验证期 **2026-10-25 ~ 2026-11-22**，决策 Gate **11-23 ~ 11-29**，开发期 **11-30 起**。原定窗口为 10-07 ~ 11-05，因规格期（10-07 ~ 10-25）全部用于建规格与写代码、H 轨采集零启动而正式顺延。**本文件的周次编号保持相对周次不变**，下表给出映射：
+>
+> | 相对周次 | 绝对日期 | 该周目标 |
+> |---|---|---|
+> | 第 1 周 | 10-25 ~ 10-31 | 需求验证启动 —— **已结束，三项里程碑均未达成，物料就绪待启动** |
+> | 第 2 周 | 11-01 ~ 11-07 | 补齐第 1 周遗留启动项 + 企业访谈 5 家 + seeding 谈判 |
+> | 第 3 周 | 11-08 ~ 11-14 | **数据采集截止日**：访谈 / 问卷 / 竞品实操全部收口 |
+> | 第 4 周 | 11-15 ~ 11-22 | 汇总与判定准备（产品定义更新、MVP 功能集裁剪） |
+> | 第 5 周 | 11-23 ~ 11-29 | 决策 Gate（判定 + 成本分析 + 风险策略 + 方向决策） |
+>
+> **实际有效采集窗口仅 11-01 ~ 11-14（2 周）**，此为顺延的直接代价，须写入 H5.1 的结论声明。详见 `validation-metrics.md`「时间线与里程碑」的窗口顺延说明。
 
 ## 🤖 给 agent 的执行指令（自动化框架读取本节）
 
@@ -338,13 +350,20 @@ A1.2 是全局关键路径起点：**验证数据的结构化 schema 必须在�
 - [ ] 19. [A3.2] 结构化竞品对比表 `[文档]`
   - _Prompt: Role: 数据整理者，负责将人工记录转为可聚合数据 | Task: 将任务 6/7（H3.1、H3.2）与任务 18（A3.1）的人工记录与检索结果整理为统一的结构化竞品对比表 | Restrictions: 输出字段须严格对齐 A1.2 的 competitors.csv schema，不得自行增删列；本任务不得调用 log-implementation | Success: 对比表可导出为 CSV；字段完整且每行有证据；M10 可聚合；D1 候选有证据支撑_
   - 详细需求
-    - 输入：任务 6/7（H3.1 / H3.2）的人工记录（含截图与笔记）、任务 18（A3.1）的检索结果
+    - **起点已就绪**：`validation/schemas/competitors-prefill.csv` 已把任务 18 [A3.1] 的 36 行公开资料（垂直 16 / 通用 6 / 技术 14）结构化并预填 5 列（platform、job_types_covered、agent_job_availability、skill_tag_support、evidence_url）。本任务在其上补两列，**不重复录入已填内容**
+    - 输入：任务 6/7（H3.1 / H3.2）的人工记录（含截图与笔记）、任务 18（A3.1）的检索结果、`competitors-prefill.csv`
     - 输出字段严格对齐任务 15 (A1.2) 的 competitors.csv schema：platform, job_types_covered, agent_job_availability, skill_tag_support, differentiation, satisfaction_score, evidence_url
     - 每行必须有 evidence_url 或截图路径支撑，无证据的字段留空而非填写推测值
+    - **补 `satisfaction_score`**：M10 需要真人实操打分，公开资料无法得出（`competitors-research.md` 硬约束 2）。留空的平台不计入 M10 均值，脚本已支持
+    - **补 `differentiation`**：本列语义为「**AgentJobs 相对该竞品的差异化功能点**」，须按 `validation/schemas/competitors.md`「D1 计点规则」逐条给出基准证据
     - 汇总 M10（满意度均值，验证 ≤5/10）；本表为平台级数据，不产出 M11（M11 是用户级指标，由任务 16 [A1.3] 的问卷 `differentiation_needs` 列产出，2026-10-11 裁定）
-    - 归纳 D1 差异化功能点候选，须逐条对应到至少一个平台的对比证据
-  - > **不调用 `log-implementation`**（文档子轨）。阻塞于任务 6、7、18（H3.1、H3.2、A3.1）。
+    - **D1 计点基准 = 垂直竞品**（2026-10-31 裁定，与 `risk-analysis.md` 风险 3 的 2026-10-25 更新、`validation-metrics.md` D1 条目三处对齐）。基准竞品：`agenticcareers.co`、`agenticengineeringjobs.com`、`agentic-engineering-jobs.com`、`ai-native-builder.com`、`aidevboard.com`
+    - **「技能标签筛选」「Agent 岗位专区」不计入 D1**——垂直竞品已提供且粒度更细（agentic 专属岗位分面、AgentOps/Prompt/Agent Architect 角色分类、LangGraph/CrewAI 栈筛选）。继续按「相对通用平台」的旧参照系计点，会得出「差异化已成立」的错误结论
+    - 每个计入点须给出三段式证据：证据类型（竞品已有 / 竞品缺失 / 竞品更弱）+ 竞品名 + evidence_url 或截图路径
+    - 维护**受控词表**：措辞不一致会使去重失效（`compute_metrics.py` 按字符串精确去重），建议另出一份 D1 逐点证据清单文档
+  - > **不调用 `log-implementation`**（文档子轨）。阻塞于任务 6、7、18（H3.1、H3.2、A3.1）——**公开资料部分已由 A3.1 完成且已预填**，本任务剩余工作量是 `satisfaction_score` 与 `differentiation` 两列 + 实操笔记
   - > 字段一致性要求高：若本任务产出的列名与 A1.2 的 schema 不符，M10/D1 将无法聚合。故须严格对齐，不得自行增删列。
+  - > **D1 的语义变更提醒**：`differentiation` 列的语义已由「观察到的差异化功能点」收窄为「AgentJobs 相对该竞品的差异化功能点」。`compute_metrics.py` 的去重计数逻辑未变（仍是跨行去重计数），变的是**填什么**——因此无需改代码，但填表人必须知道这个区别，否则会把竞品自身的功能当成我们的差异化点计进去。
 
 - [ ] 20. [A4.1] 用户故事编写 `[文档]`
   - _Prompt: Role: 产品经理，负责将验证结论转化为可开发的需求描述 | Task: 基于任务 9 (H4.2) 裁剪后的最小功能集，编写用户故事(User Stories) | Restrictions: 本任务不得调用 log-implementation | Success: 每条保留功能有对应用户故事；验收标准可追溯；无依据的假设已显式标注_

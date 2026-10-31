@@ -1,6 +1,6 @@
 # validation —— 验证数据管道
 
-任务 **15 [A1.2]** 的产出。这是 AgentJobs 30 天验证期的**关键路径起点**：
+任务 **15 [A1.2]** 的产出。这是 AgentJobs 验证期（2026-10-25 ~ 11-22）的**关键路径起点**：
 其 schema 必须在任务 1/4/6/7（H1.1 / H2.1 / H3.1）采集数据**之前**定稿，
 否则访谈与问卷数据无法聚合，M4–M12 全部不可计算。
 
@@ -38,8 +38,9 @@ validation/
 │   ├── companies.md
 │   ├── survey_responses.md
 │   ├── social_posts.md
-│   ├── competitors.md
+│   ├── competitors.md          # 含 D1 计点规则（基准＝垂直竞品）
 │   ├── competitors-research.md # 任务 18 [A3.1] 竞品公开资料检索结果（36 个平台）
+│   ├── competitors-prefill.csv # 上述检索结果的 36 行结构化预填（5 列已填、2 列待实操）
 │   └── templates/*.csv         # 表头模板（可直接复制填写）
 └── tests/test_compute_metrics.py
 ```
@@ -71,10 +72,20 @@ validation/
 | `competitors.csv` | 任务 19 [A3.2] | 🟢 A `[文档]` | M10、D1 |
 
 > `competitors.csv` 的**公开资料部分已由任务 18 [A3.1] 完成**（见
-> `schemas/competitors-research.md`，36 个平台）。任务 19 [A3.2] 负责把它与
-> 任务 6/7（H3.1 / H3.2）的真人实操记录合并为最终对比表。
+> `schemas/competitors-research.md`，36 个平台），并已结构化预填为
+> **`schemas/competitors-prefill.csv`**（36 行 × 5 列已填）。任务 19 [A3.2] 只需在其上
+> 补两列 + 并入任务 6/7（H3.1 / H3.2）的真人实操记录。
 > **两处关键缺口留给实操**：`satisfaction_score` 全部留空（M10 需要真人打分，
 > 公开资料无法得出），以及 P0 级的 20 项待验证清单。
+>
+> ```bash
+> cp validation/schemas/competitors-prefill.csv validation/data/competitors.csv
+> ```
+>
+> **D1 基准已变更（2026-10-31）**：差异化点的参照物从「通用平台」改为**垂直竞品**
+> （`agenticcareers.co` 等 5 家已在运营的平台）。「技能标签筛选」「Agent 岗位专区」
+> 因垂直竞品已提供且粒度更细，**不再计入 D1**。计点规则见
+> [schemas/competitors.md](schemas/competitors.md)「D1 计点规则」。
 
 ## 三条不可违反的约束
 
